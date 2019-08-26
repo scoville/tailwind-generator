@@ -1,6 +1,6 @@
 {
   "name": "tailwind-generator",
-  "version": "0.1.2",
+  "version": "0.1.0",
   "main": "./lib/tailwind.js",
   "bin": {
     "tailwind-generator": "./lib/tailwind.js"
@@ -9,8 +9,7 @@
   "scripts": {
     "build": "tsc",
     "ts": "tsc --noEmit",
-    "lint": "tslint --project ./tsconfig.json",
-    "postinstall": "yarn build"
+    "lint": "tslint --project ./tsconfig.json"
   },
   "dependencies": {
     "cac": "^6.5.2",
