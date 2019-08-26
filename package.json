@@ -1,0 +1,31 @@
+{
+  "name": "tailwind-generator",
+  "version": "0.1.0",
+  "main": "./lib/tailwind.js",
+  "bin": {
+    "myapp": "./lib/tailwind.js"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "ts": "tsc --noEmit",
+    "lint": "tslint --project ./tsconfig.json",
+    "postinstall": "yarn build"
+  },
+  "dependencies": {
+    "cac": "^6.5.2",
+    "postcss": "^7.0.17",
+    "tailwindcss": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^12.7.2",
+    "prettier": "^1.18.2",
+    "tslint": "^5.19.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.5.3",
+    "yarn": "^1.17.3"
+  },
+  "engines": {
+    "node": ">=10.12.0"
+  }
+}
