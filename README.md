@@ -1,6 +1,6 @@
 ## Tailwind generator
 
-Generates code and css from a tailwind config file. Currently supports Elm and ReasonML!
+Generates code and css from a tailwind config file. Currently supports Elm, ReasonML, and TypeScript!
 
 ### Commands:
 
@@ -11,7 +11,7 @@ To get help:
 Options:
 
 - `-c`, `--config` Provide tailwind.config.js path
-- `-l`, `--lang` Language used in generated code (`elm|reasonml`)
+- `-l`, `--lang` Language used in generated code (`elm|reasonml|typescript`)
 - `-o`, `--output` Provide directory for generated code (default: `./src`)
 - `--cssOutput` Provide full path (including file name) for generated css stylesheet (default: `./tailwind.css`)
 - `--cssInput` Provide path of your css stylesheet which uses the @tailwind directive to inject Tailwind's preflight and utilities styles into your CSS - (default: `$TAILWIND_GENERATOR/assets/input.css`)
