@@ -3,17 +3,17 @@ import path from "path";
 
 import { Adapter, Class } from "../types";
 
-const fileName = "Classes.elm";
+const fileName = "Tailwind.elm";
 
 const generate = (classes: Class[]): string => {
   const elmify = ({ className, name }: Class): string => `
 
-${name} : TailwindClass
+${name} : Tailwind
 ${name} =
-    TailwindClass "${className}"
+    Tailwind "${className}"
 `;
 
-  return `module Tailwind.Classes exposing (TailwindClass, tailwind, unwrap, ${classes
+  return `module Tailwind.Classes exposing (Tailwind, tailwind, unwrap, ${classes
     .map(cl => cl.name)
     .join(", ")})
 
@@ -24,15 +24,15 @@ import Html.Attributes as Attributes
 import List
 
 
-type TailwindClass
-    = TailwindClass String
+type Tailwind
+    = Tailwind String
 
 
-unwrap : List TailwindClass -> String
+unwrap : List Tailwind -> String
 unwrap cs =
-    cs |> List.map (\\(TailwindClass c) -> c) |> String.join " "
+    cs |> List.map (\\(Tailwind c) -> c) |> String.join " "
 
-tailwind : List TailwindClass -> Html.Attribute msg
+tailwind : List Tailwind -> Html.Attribute msg
 tailwind cs =
     Attributes.class <| unwrap cs
 ${classes.map(elmify).join("")}

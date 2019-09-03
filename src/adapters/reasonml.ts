@@ -3,9 +3,9 @@ import path from "path";
 
 import { Adapter, Class } from "../types";
 
-const fileName = "Classes.re";
+const fileName = "Tailwind.re";
 
-const interfaceFileName = "Classes.rei";
+const interfaceFileName = "Tailwind.rei";
 
 const generate = (classes: Class[]): string => {
   const reasonalize = ({ className, name }: Class): string => `
