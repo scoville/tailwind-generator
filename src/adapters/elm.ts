@@ -13,7 +13,7 @@ ${name} =
     Tailwind "${className}"
 `;
 
-  return `module Tailwind.Classes exposing (Tailwind, tailwind, unwrap, ${classes
+  return `module Tailwind exposing (Tailwind, tailwind, unwrap, ${classes
     .map(cl => cl.name)
     .join(", ")})
 
