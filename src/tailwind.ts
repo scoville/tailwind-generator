@@ -20,6 +20,7 @@ interface Options {
 const loadAdapters = async () => ({
   elm: await import("./adapters/elm"),
   reasonml: await import("./adapters/reasonml"),
+  typescript: await import("./adapters/typescript"),
 });
 
 const main = async ({ config, cssInput, cssOutput, lang, output }: Options) => {
@@ -67,7 +68,7 @@ cli.option("-c, --config <config>", "Provide tailwind.config.js path");
 
 cli.option(
   "-l, --lang <lang>",
-  "Language used in generated code (elm|reasonml)",
+  "Language used in generated code (elm|reasonml|typescript)",
 );
 
 cli.option("-o, --output <dir>", "Provide directory for generated code", {

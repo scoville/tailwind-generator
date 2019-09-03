@@ -6,8 +6,10 @@ import { Class } from "./types";
 export const camelCase = (name: string) =>
   name.replace(/[-_\s]+([a-z0-9])/g, (_, word) => word.toUpperCase());
 
-export const isValidLang = (s: string): s is "elm" | "reasonml" =>
-  ["elm", "reasonml"].includes(s);
+export const isValidLang = (
+  str: string,
+): str is "elm" | "reasonml" | "typescript" =>
+  ["elm", "reasonml", "typescript"].includes(str);
 
 export const shutDownLog = async <T>(f: () => Promise<T>): Promise<T> => {
   // tslint:disable-next-line: no-console
