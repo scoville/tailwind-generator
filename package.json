@@ -26,5 +26,18 @@
   },
   "engines": {
     "node": ">=10.12.0"
-  }
+  },
+  "description": "Generates code and css from a tailwind config file. Currently supports Elm, ReasonML, and TypeScript!",
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/scoville/tailwind-generator.git"
+  },
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/scoville/tailwind-generator/issues"
+  },
+  "homepage": "https://github.com/scoville/tailwind-generator#readme"
 }
