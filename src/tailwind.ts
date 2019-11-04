@@ -4,6 +4,8 @@ import cac from "cac";
 import fs from "fs";
 import path from "path";
 
+import langs from "./langs";
+import { Adapter, Lang } from "./types";
 import * as utils from "./utils";
 
 // tslint:disable-next-line: no-var-requires
@@ -17,12 +19,15 @@ interface Options {
   output: string;
 }
 
-const loadAdapters = async () => ({
-  elm: await import("./adapters/elm"),
-  purescript: await import("./adapters/purescript"),
-  reasonml: await import("./adapters/reasonml"),
-  typescript: await import("./adapters/typescript"),
-});
+const loadAdapters: () => Record<Lang, Promise<Adapter>> = () =>
+  langs.reduce(
+    (agg, lang) => ({
+      ...agg,
+      [lang]: import(`./adapters/${lang}`),
+    }),
+    // tslint:disable-next-line: no-object-literal-type-assertion
+    {} as Record<Lang, Promise<Adapter>>,
+  );
 
 const main = async ({ config, cssInput, cssOutput, lang, output }: Options) => {
   const adapters = await loadAdapters();
@@ -36,7 +41,7 @@ const main = async ({ config, cssInput, cssOutput, lang, output }: Options) => {
     return process.exit(1);
   }
 
-  const adapter = adapters[lang];
+  const adapter = await adapters[lang];
 
   await utils.shutDownLog(async () => {
     await build.run([cssInput], {

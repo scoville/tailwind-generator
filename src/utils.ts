@@ -1,15 +1,14 @@
 import fs from "fs";
 import postcss from "postcss";
 
-import { Class } from "./types";
+import langs from "./langs";
+import { Class, Lang } from "./types";
 
 export const camelCase = (name: string) =>
   name.replace(/[-_\s]+([a-z0-9])/g, (_, word) => word.toUpperCase());
 
-export const isValidLang = (
-  str: string,
-): str is "elm" | "reasonml" | "typescript" | "purescript" =>
-  ["elm", "reasonml", "typescript", "purescript"].includes(str);
+export const isValidLang = (str: string): str is Lang =>
+  langs.includes(str as any);
 
 export const shutDownLog = async <T>(f: () => Promise<T>): Promise<T> => {
   // tslint:disable-next-line: no-console
