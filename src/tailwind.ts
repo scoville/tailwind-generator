@@ -74,7 +74,7 @@ cli.option("-c, --config <config>", "Provide tailwind.config.js path");
 
 cli.option(
   "-l, --lang <lang>",
-  "Language used in generated code (elm|reasonml|typescript|purescript)",
+  `Language used in generated code (${langs.join("|")})`,
 );
 
 cli.option("-o, --output <dir>", "Provide directory for generated code", {
