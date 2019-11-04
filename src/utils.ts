@@ -8,8 +8,8 @@ export const camelCase = (name: string) =>
 
 export const isValidLang = (
   str: string,
-): str is "elm" | "reasonml" | "typescript" =>
-  ["elm", "reasonml", "typescript"].includes(str);
+): str is "elm" | "reasonml" | "typescript" | "purescript" =>
+  ["elm", "reasonml", "typescript", "purescript"].includes(str);
 
 export const shutDownLog = async <T>(f: () => Promise<T>): Promise<T> => {
   // tslint:disable-next-line: no-console
