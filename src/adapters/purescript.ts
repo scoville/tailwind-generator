@@ -15,7 +15,7 @@ ${name} =
   return `module Tailwind (
   Tailwind,
   tailwind,
-  tailwindOpt,
+  tailwindMaybes,
 ${classes.map(cl => `  ${cl.name}`).join(",\n")}
   ) where
 
@@ -36,8 +36,8 @@ unwrap (Tailwind c) = c
 tailwind :: Array Tailwind -> String
 tailwind = String.joinWith " " <<< map unwrap
 
-tailwindOpt :: Array (Maybe Tailwind) -> String
-tailwindOpt = tailwind <<< Array.catMaybes
+tailwindMaybes :: Array (Maybe Tailwind) -> String
+tailwindMaybes = tailwind <<< Array.catMaybes
 ${classes.map(purify).join("")}
   `;
 };
