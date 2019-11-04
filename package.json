@@ -27,7 +27,7 @@
   "engines": {
     "node": ">=10.12.0"
   },
-  "description": "Generates code and css from a tailwind config file. Currently supports Elm, ReasonML, and TypeScript!",
+  "description": "Generates code and css from a tailwind config file. Currently supports Elm, ReasonML, TypeScript, and PureScript!",
   "directories": {
     "lib": "lib"
   },
