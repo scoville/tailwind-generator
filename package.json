@@ -12,22 +12,22 @@
     "lint": "tslint --project ./tsconfig.json"
   },
   "dependencies": {
-    "cac": "^6.5.2",
-    "postcss": "^7.0.17",
-    "tailwindcss": "^1.1.2"
+    "cac": "^6.5.3",
+    "postcss": "^7.0.21",
+    "tailwindcss": "^1.1.3"
   },
   "devDependencies": {
-    "@types/node": "^12.7.2",
+    "@types/node": "^12.12.5",
     "prettier": "^1.18.2",
-    "tslint": "^5.19.0",
+    "tslint": "^6.0.0-beta0",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.5.3",
-    "yarn": "^1.17.3"
+    "typescript": "^3.6.4",
+    "yarn": "^1.19.1"
   },
   "engines": {
     "node": ">=10.12.0"
   },
-  "description": "Generates code and css from a tailwind config file. Currently supports Elm, ReasonML, and TypeScript!",
+  "description": "Generates code and css from a tailwind config file. Currently supports Elm, ReasonML, TypeScript, and PureScript!",
   "directories": {
     "lib": "lib"
   },
