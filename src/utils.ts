@@ -58,6 +58,11 @@ export const readClasses = (filepath: string) => {
       .replace(/^\S*\./, "")
       .replace(":focus", "")
       .replace(":hover", "")
+      .replace(":active", "")
+      .replace(":disabled", "")
+      .replace(":visited", "")
+      .replace(":first-child", "")
+      .replace(":last-child", "")
       .replace(/\\\//g, "Over")
       .replace(/\\/g, "")
       .split(":")
@@ -74,6 +79,11 @@ export const readClasses = (filepath: string) => {
       .replace(/^\S*\./, "")
       .replace(":focus", "")
       .replace(":hover", "")
+      .replace(":active", "")
+      .replace(":disabled", "")
+      .replace(":visited", "")
+      .replace(":first-child", "")
+      .replace(":last-child", "")
       .replace(/\\\//g, "/")
       .replace(/\\/g, "");
 
