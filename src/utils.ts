@@ -25,14 +25,24 @@ export const shutDownLog = async <T>(f: () => Promise<T>): Promise<T> => {
   return res;
 };
 
+const cssRegExp = /\.-?[_a-zA-Z]+[\:\\_a-zA-Z0-9-]*/;
+
 export const readClasses = (filepath: string) => {
   const root = postcss.parse(fs.readFileSync(filepath, "utf8"));
 
   const classes: Class[] = [];
 
-  root.walkRules(({ selector: className }) => {
+  root.walkRules(({ selector }) => {
     // Ignore anything that's not a class
-    if (!className.startsWith(".")) {
+    const matches = selector.match(cssRegExp);
+
+    if (!matches) {
+      return;
+    }
+
+    let className = matches[0];
+
+    if (!className) {
       return;
     }
 
