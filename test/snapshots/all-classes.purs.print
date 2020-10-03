@@ -1,0 +1,71 @@
+spaceY0 :: Tailwind
+spaceY0 = wrap "space-y-0"
+
+divideY0 :: Tailwind
+divideY0 = wrap "divide-y-0"
+
+srOnly :: Tailwind
+srOnly = wrap "sr-only"
+
+spaceY0 :: Tailwind
+spaceY0 = wrap "space-y-0"
+
+focusSrOnly :: Tailwind
+focusSrOnly = wrap "focus\\:sr-only"
+
+bgGray100 :: Tailwind
+bgGray100 = wrap "bg-gray-100"
+
+hoverBgGray100 :: Tailwind
+hoverBgGray100 = wrap "hover\\:bg-gray-100"
+
+bgGradientToT :: Tailwind
+bgGradientToT = wrap "bg-gradient-to-t"
+
+fromTansparent :: Tailwind
+fromTansparent = wrap "from-transparent"
+
+borderBlack :: Tailwind
+borderBlack = wrap "border-black"
+
+hoverFontHairline :: Tailwind
+hoverFontHairline = wrap "hover\\:font-hairline"
+
+h0 :: Tailwind
+h0 = wrap "h-0"
+
+hFull :: Tailwind
+hFull = wrap "h-full"
+
+negM1 :: Tailwind
+negM1 = wrap "-m-1"
+
+w1Over2 :: Tailwind
+w1Over2 = wrap "w-1\\/2"
+
+objectContain :: Tailwind
+objectContain = wrap "object-contain"
+
+placeholderBlack :: Tailwind
+placeholderBlack = wrap "placeholder-black"
+
+focusPlaceholderTeal100 :: Tailwind
+focusPlaceholderTeal100 = wrap "focus\\:placeholder-teal-100"
+
+firstBorderB0 :: Tailwind
+firstBorderB0 = wrap "first\\:border-b-0"
+
+lastBorderB0 :: Tailwind
+lastBorderB0 = wrap "last\\:border-b-0"
+
+ordinal :: Tailwind
+ordinal = wrap "ordinal"
+
+slashedZero :: Tailwind
+slashedZero = wrap "slashed-zero"
+
+transform :: Tailwind
+transform = wrap "transform"
+
+negTranslateY5 :: Tailwind
+negTranslateY5 = wrap "-translate-y-5"
