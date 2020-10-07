@@ -1,30 +1,30 @@
-module Parser (PseudoAst(..), parseFromFile) where
+module Parser (Node, PseudoAst(..), parseFromFile) where
 
 import Prelude
-import Control.Alt ((<|>))
-import Data.Array (sort)
 import Data.Either (Either)
 import Data.Foldable (fold)
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
-import Data.List.NonEmpty (catMaybes)
-import Data.Maybe (Maybe(..), isJust)
-import Data.Newtype (class Newtype, over)
-import Data.Set as Set
-import Data.String (Pattern(..), Replacement(..), replace)
+import Data.Maybe (maybe)
+import Data.Newtype (class Newtype)
 import Data.String.CodeUnits (singleton)
 import Data.String.Extra (camelCase)
+import Data.Traversable (sequence)
 import Effect.Class (class MonadEffect, liftEffect)
 import Foreign.Generic (class Decode, defaultOptions, genericDecode)
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync (readTextFile)
 import Node.Path (FilePath)
-import Text.Parsing.StringParser (ParseError, Parser, runParser)
-import Text.Parsing.StringParser.CodeUnits (alphaNum, anyChar, char, eof, oneOf, string)
-import Text.Parsing.StringParser.Combinators (choice, lookAhead, many1, many1Till, manyTill, optionMaybe)
+import Text.Parsing.StringParser (ParseError, runParser)
+import Text.Parsing.StringParser.CodeUnits (alphaNum, char, string)
+import Text.Parsing.StringParser.Combinators (choice, many1, optionMaybe)
+import Utils (getClassNames)
+
+type Node
+  = { className :: String, name :: String }
 
 newtype PseudoAst
-  = PseudoAst (Array { className :: String, name :: String })
+  = PseudoAst (Array Node)
 
 derive newtype instance eqPseudoAst :: Eq PseudoAst
 
@@ -40,50 +40,25 @@ instance showPseudoAst :: Show PseudoAst where
 instance decodePseudoAst :: Decode PseudoAst where
   decode = genericDecode defaultOptions { unwrapSingleConstructors = true }
 
-pseudoAstParser :: Parser PseudoAst
-pseudoAstParser = PseudoAst <<< Set.toUnfoldable <<< Set.fromFoldable <$> nodesParser
+nodeFromClassName :: String -> Either ParseError Node
+nodeFromClassName className = ({ className, name: _ }) <$> camelCase <$> runParser nameParser className
   where
-  nodesParser = catMaybes <$> nodeParser `many1Till` eof
-
-  nodeParser = ado
-    skipNotClass
-    -- TODO: Cheating with camelCase here, let's move the logic into the name parser!
-    name <- map camelCase <$> lookAhead nameParser
-    -- TODO: It seems that handlebars doesn't keep the characters escaped, so we have to escape them manually
-    className <- map (replace (Pattern "\\") (Replacement "\\\\")) <$> classNameParser
-    in { className: _, name: _ } <$> className <*> name
-
-  skipNotClass = anyChar `manyTill` (void (char '.') <|> eof)
-
-  classNameParser = ado
-    className <- parseFOrEof $ many1 anyValidChar
-    end <- classNameEnd
-    in if isJust end then className else Nothing
-
   nameParser = ado
-    neg <- map (const "neg-") <$> optionMaybe (char '-')
-    name <- parseFOrEof $ many1 anyValidAndSpecialChar
-    end <- classNameEnd
-    in if isJust end then neg <> name else Nothing
-    where
-    anyValidAndSpecialChar =
-      choice
-        [ const "-over-" <$> string "\\/"
-        , const "-" <$> string "\\:"
-        , anyValidChar
-        ]
+    neg <- maybe "" (const "neg-") <$> optionMaybe (char '-')
+    name <- fold <$> many1 anyValidAndSpecialChar
+    in neg <> name
 
-  anyValidChar =
+  anyValidAndSpecialChar =
     choice
-      [ singleton <$> alphaNum
+      [ const "-over-" <$> string "\\\\/"
+      , const "-" <$> string "\\\\:"
+      , singleton <$> alphaNum
       , string "\\:"
       , string "-"
       , string "\\/"
       ]
 
-  parseFOrEof parser = (Just <<< fold <$> parser) <|> (const Nothing <$> eof)
-
-  classNameEnd = optionMaybe $ oneOf [ ':', ',', '{', ' ', '\n' ]
-
 parseFromFile :: forall m. MonadEffect m => FilePath -> m (Either ParseError PseudoAst)
-parseFromFile cssPath = runParser pseudoAstParser <$> (liftEffect $ readTextFile UTF8 cssPath)
+parseFromFile cssPath = do
+  cssContent <- liftEffect $ readTextFile UTF8 cssPath
+  pure $ PseudoAst <$> (sequence $ nodeFromClassName <$> getClassNames cssContent cssPath)

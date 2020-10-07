@@ -1,7 +1,8 @@
-module Utils (catchAndKill, kill, tailwindBuild, mkdirp) where
+module Utils (catchAndKill, getClassNames, kill, tailwindBuild, mkdirp) where
 
 import Prelude
 import Control.Promise (Promise, toAffE)
+import Data.Function.Uncurried (Fn2, runFn2)
 import Effect (Effect)
 import Effect.Aff (Error, catchError)
 import Effect.Aff.Class (class MonadAff, liftAff)
@@ -9,6 +10,7 @@ import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
 import Effect.Exception (catchException)
 import Effect.Uncurried (EffectFn1, EffectFn3, runEffectFn1, runEffectFn3)
+import Node.Path (FilePath)
 import Node.Process (exit)
 
 kill :: forall a m. MonadEffect m => Error -> m a
@@ -28,3 +30,8 @@ foreign import _mkdirp :: EffectFn1 String Unit
 
 mkdirp :: forall m. MonadEffect m => String -> m Unit
 mkdirp = liftEffect <<< runEffectFn1 _mkdirp
+
+foreign import _getClassNames :: Fn2 String FilePath (Array String)
+
+getClassNames :: String -> FilePath -> Array String
+getClassNames cssContent = runFn2 _getClassNames cssContent

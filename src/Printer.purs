@@ -16,7 +16,7 @@ import Utils (catchAndKill, kill)
 
 formatFromFile :: FilePath -> AppM String
 formatFromFile outputFile =
-  asks _.cssInput
+  asks _.cssOutput
     >>= parseFromFile
     >>= traverse formatFile
     >>= either (kill <<< error <<< show) pure

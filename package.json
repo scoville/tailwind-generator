@@ -21,6 +21,7 @@
     "test": "spago -x test.dhall test"
   },
   "dependencies": {
+    "css": "^3.0.0",
     "handlebars": "^4.7.6",
     "tailwindcss": "1.8.3"
   },

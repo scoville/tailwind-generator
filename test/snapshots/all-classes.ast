@@ -22,5 +22,6 @@
   { "className": "ordinal", "name": "ordinal" },
   { "className": "slashed-zero", "name": "slashedZero" },
   { "className": "transform", "name": "transform" },
-  { "className": "-translate-y-5", "name": "negTranslateY5" }
+  { "className": "-translate-y-5", "name": "negTranslateY5" },
+  { "className": "xl\\\\:ease-in-out", "name": "xlEaseInOut" }
 ]
