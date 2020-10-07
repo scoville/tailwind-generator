@@ -21,6 +21,7 @@ langParser =
     "reasonml" -> Right ReasonML
     "elm" -> Right Elm
     "typescript" -> Right TypeScript
+    "typescript-type-level" -> Right TypeScriptTypeLevel
     lang -> Left $ "\"" <> lang <> "\" is not a valid lang"
 
 optionsParser :: Parser Options
@@ -38,7 +39,7 @@ optionsParser = ado
       ( long "lang"
           <> short 'l'
           <> metavar "LANG"
-          <> help "Language used in generated code (elm|reasonml|typescript|purescript)"
+          <> help "Language used in generated code (elm|reasonml|typescript|typescript-type-level|purescript)"
       )
   output <-
     strOption

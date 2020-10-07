@@ -9,6 +9,7 @@ data Lang
   | Elm
   | ReasonML
   | TypeScript
+  | TypeScriptTypeLevel
 
 derive instance eqLang :: Eq Lang
 
