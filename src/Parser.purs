@@ -53,9 +53,7 @@ nodeFromClassName className = ({ className, name: _ }) <$> camelCase <$> runPars
       [ const "-over-" <$> string "\\\\/"
       , const "-" <$> string "\\\\:"
       , singleton <$> alphaNum
-      , string "\\:"
       , string "-"
-      , string "\\/"
       ]
 
 parseFromFile :: forall m. MonadEffect m => FilePath -> m (Either ParseError PseudoAst)

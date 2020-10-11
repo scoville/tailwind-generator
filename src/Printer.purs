@@ -1,10 +1,10 @@
 module Printer (save) where
 
 import Prelude
-import AppM (AppM)
-import Control.Monad.Reader (ask, asks)
+import Control.Monad.Reader (class MonadAsk, ask, asks)
 import Data.Either (either)
 import Data.Traversable (traverse)
+import Effect.Class (class MonadEffect)
 import Effect.Exception (error)
 import Lang (Lang(..))
 import Node.Encoding (Encoding(..))
@@ -14,7 +14,11 @@ import Parser (PseudoAst(..), parseFromFile)
 import Text.Handlebars as Handlebars
 import Utils (catchAndKill, kill)
 
-formatFromFile :: FilePath -> AppM String
+formatFromFile ::
+  forall r m.
+  MonadEffect m =>
+  MonadAsk { cssOutput :: String | r } m =>
+  FilePath -> m String
 formatFromFile outputFile =
   asks _.cssOutput
     >>= parseFromFile
@@ -26,7 +30,7 @@ formatFromFile outputFile =
     pure $ Handlebars.compile template { nodes }
 
 -- FIXME: Normalize and resolve path
-save :: AppM Unit
+save :: forall r m. MonadEffect m => MonadAsk { cssOutput :: String, lang :: Lang, output :: String | r } m => m Unit
 save = do
   { lang, output } <- ask
   case lang of
