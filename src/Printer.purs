@@ -2,6 +2,7 @@ module Printer (save) where
 
 import Prelude
 import Control.Monad.Reader (class MonadAsk, ask, asks)
+import Control.Monad.Logger.Class (class MonadLogger)
 import Data.Either (either)
 import Data.Traversable (traverse)
 import Effect.Class (class MonadEffect)
@@ -31,7 +32,11 @@ formatFromFile outputFile =
     pure $ Handlebars.compile template { nodes }
 
 -- FIXME: Normalize and resolve path
-save :: forall r m. MonadEffect m => MonadAsk { cssOutput :: String, lang :: Lang, output :: String | r } m => m Unit
+save ::
+  forall r m.
+  MonadEffect m =>
+  MonadLogger m =>
+  MonadAsk { cssOutput :: String, lang :: Lang, output :: String | r } m => m Unit
 save = do
   { lang, output } <- ask
   case lang of

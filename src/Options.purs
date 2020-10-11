@@ -4,7 +4,7 @@ import Prelude
 import Data.Either (Either(..))
 import Lang (Lang(..))
 import Node.Globals (__dirname)
-import Options.Applicative (Parser, ParserInfo, ReadM, eitherReader, header, help, helper, info, long, metavar, option, short, showDefault, strOption, value, (<**>))
+import Options.Applicative (Parser, ParserInfo, ReadM, eitherReader, header, help, helper, info, long, metavar, option, short, showDefault, strOption, switch, value, (<**>))
 
 type Options
   = { config :: String
@@ -12,6 +12,7 @@ type Options
     , output :: String
     , cssOutput :: String
     , cssInput :: String
+    , verbose :: Boolean
     }
 
 langParser :: ReadM Lang
@@ -66,7 +67,13 @@ optionsParser = ado
           <> (value $ __dirname <> "/assets/input.css")
           <> help "Provide path of your css stylesheet which uses the @tailwind directive to inject Tailwind's preflight and utilities styles into your CSS"
       )
-  in { config, lang, output, cssOutput, cssInput }
+  verbose <-
+    switch
+      ( long "verbose"
+          <> short 'v'
+          <> help "Enable verbose mode"
+      )
+  in { config, lang, output, cssOutput, cssInput, verbose }
 
 options :: ParserInfo Options
 options = info (optionsParser <**> helper) $ header "Generates code and css from a tailwind config file."
