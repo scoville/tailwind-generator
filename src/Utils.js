@@ -40,7 +40,7 @@ exports._getClassNames = function (cssContent, source) {
                 return acc;
               }
 
-              return [...acc, className.replace(/\\/, "\\\\")];
+              return [...acc, className.replace(/\\/g, "\\\\")];
             } catch (_) {
               return acc;
             }

@@ -17,7 +17,7 @@
   },
   "scripts": {
     "start": "spago build -w",
-    "build": "spago bundle-app -t index.js && terser index.js -o index.js",
+    "build": "spago bundle-app -t index.js.tmp && terser index.js.tmp -o index.js.tmp && echo \"#!/usr/bin/env node\" > index.js && cat index.js.tmp >> index.js && rm index.js.tmp",
     "test": "spago -x test.dhall test"
   },
   "dependencies": {

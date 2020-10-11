@@ -23,5 +23,7 @@
   { "className": "slashed-zero", "name": "slashedZero" },
   { "className": "transform", "name": "transform" },
   { "className": "-translate-y-5", "name": "negTranslateY5" },
-  { "className": "xl\\\\:ease-in-out", "name": "xlEaseInOut" }
+  { "className": "xl\\\\:ease-in-out", "name": "xlEaseInOut" },
+  { "className": "hover\\\\:translate-x-1\\\\/2", "name": "hoverTranslateX1Over2"},
+  { "className": "hover\\\\:-translate-x-1\\\\/2", "name": "hoverNegTranslateX1Over2"}
 ]

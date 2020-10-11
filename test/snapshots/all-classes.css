@@ -8,6 +8,14 @@
  * 2. Prevent adjustments of font size after orientation changes in iOS.
  */
 
+.hover\:-translate-x-1\/2:hover {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover\:translate-x-1\/2:hover {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .xl\:ease-in-out {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }

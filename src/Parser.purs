@@ -50,7 +50,8 @@ nodeFromClassName className = ({ className, name: _ }) <$> camelCase <$> runPars
 
   anyValidAndSpecialChar =
     choice
-      [ const "-over-" <$> string "\\\\/"
+      [ const "-neg-" <$> string "\\\\:-"
+      , const "-over-" <$> string "\\\\/"
       , const "-" <$> string "\\\\:"
       , singleton <$> alphaNum
       , string "-"
