@@ -8,6 +8,7 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Control.Monad.Logger.Class (info)
 import Options (options)
+import Data.Log.Tag (tag)
 import Options.Applicative (execParser)
 import Printer (save) as Printer
 import Data.Map (empty)
@@ -18,8 +19,14 @@ main = launchAff_ $ runAppM app =<< liftEffect (execParser options)
   where
   app = do
     { config, cssInput, cssOutput, output } <- ask
-    info empty "Building Tailwind css"
+    info
+      ( tag "Tailwind config file" config
+          <> tag "Css input file" cssInput
+          <> tag "Css output file" cssOutput
+      )
+      "Generating Tailwind css..."
     tailwindBuild config cssInput cssOutput
+    info empty "Done generating Tailwind css."
     catchAndKill $ mkdirp output
     Printer.save
     info empty "Done"
