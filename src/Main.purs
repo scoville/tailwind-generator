@@ -11,7 +11,6 @@ import Options (options)
 import Data.Log.Tag (tag)
 import Options.Applicative (execParser)
 import Printer (save) as Printer
-import Data.Map (empty)
 import Utils (catchAndKill, mkdirp, tailwindBuild)
 
 main :: Effect Unit
@@ -26,7 +25,7 @@ main = launchAff_ $ runAppM app =<< liftEffect (execParser options)
       )
       "Generating Tailwind css..."
     tailwindBuild config cssInput cssOutput
-    info empty "Done generating Tailwind css."
+    info mempty "Done generating Tailwind css."
     catchAndKill $ mkdirp output
     Printer.save
-    info empty "Done"
+    info mempty "Done"
