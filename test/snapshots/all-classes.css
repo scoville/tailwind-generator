@@ -1,0 +1,198 @@
+/*! normalize.css v8.0.1 | MIT License | github.com/necolas/normalize.css */
+
+/* Document
+   ========================================================================== */
+
+/**
+ * 1. Correct the line height in all browsers.
+ * 2. Prevent adjustments of font size after orientation changes in iOS.
+ */
+
+.hover\:-translate-x-1\/2:hover {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover\:translate-x-1\/2:hover {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.xl\:ease-in-out {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.space-y-0 > :not(template) ~ :not(template) {
+  --space-y-reverse: 0;
+  margin-top: calc(0px * calc(1 - var(--space-y-reverse)));
+  margin-bottom: calc(0px * var(--space-y-reverse));
+}
+
+.divide-y-0 > :not(template) ~ :not(template) {
+  --divide-y-reverse: 0;
+  border-top-width: calc(0px * calc(1 - var(--divide-y-reverse)));
+  border-bottom-width: calc(0px * var(--divide-y-reverse));
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.focus\:sr-only:focus {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.appearance-none {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.bg-gray-100 {
+  --bg-opacity: 1;
+  background-color: #f7fafc;
+  background-color: rgba(247, 250, 252, var(--bg-opacity));
+}
+
+.hover\:bg-gray-100:hover {
+  --bg-opacity: 1;
+  background-color: #f7fafc;
+  background-color: rgba(247, 250, 252, var(--bg-opacity));
+}
+
+.bg-gradient-to-t {
+  background-image: linear-gradient(to top, var(--gradient-color-stops));
+}
+
+.from-transparent {
+  --gradient-from-color: transparent;
+  --gradient-color-stops: var(--gradient-from-color),
+    var(--gradient-to-color, rgba(0, 0, 0, 0));
+}
+
+.border-black {
+  --border-opacity: 1;
+  border-color: #000;
+  border-color: rgba(0, 0, 0, var(--border-opacity));
+}
+
+.hover\:font-hairline:hover {
+  font-weight: 100;
+}
+
+.h-0 {
+  height: 0;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.-m-1 {
+  margin: -0.25rem;
+}
+
+.w-1\/2 {
+  width: 50%;
+}
+
+.object-contain {
+  -o-object-fit: contain;
+  object-fit: contain;
+}
+
+.placeholder-black::-moz-placeholder {
+  --placeholder-opacity: 1;
+  color: #000;
+  color: rgba(0, 0, 0, var(--placeholder-opacity));
+}
+
+.placeholder-black:-ms-input-placeholder {
+  --placeholder-opacity: 1;
+  color: #000;
+  color: rgba(0, 0, 0, var(--placeholder-opacity));
+}
+
+.placeholder-black::placeholder {
+  --placeholder-opacity: 1;
+  color: #000;
+  color: rgba(0, 0, 0, var(--placeholder-opacity));
+}
+
+.focus\:placeholder-teal-100:focus::-moz-placeholder {
+  --placeholder-opacity: 1;
+  color: #e6fffa;
+  color: rgba(230, 255, 250, var(--placeholder-opacity));
+}
+
+.focus\:placeholder-teal-100:focus:-ms-input-placeholder {
+  --placeholder-opacity: 1;
+  color: #e6fffa;
+  color: rgba(230, 255, 250, var(--placeholder-opacity));
+}
+
+.focus\:placeholder-teal-100:focus::placeholder {
+  --placeholder-opacity: 1;
+  color: #e6fffa;
+  color: rgba(230, 255, 250, var(--placeholder-opacity));
+}
+
+.first\:border-b-0:first-child {
+  border-bottom-width: 0 !important;
+}
+
+.last\:border-b-0:last-child {
+  border-bottom-width: 0 !important;
+}
+
+.ordinal,
+.slashed-zero {
+  --font-variant-numeric-ordinal: var(--tailwind-empty, /*!*/ /*!*/);
+  --font-variant-numeric-slashed-zero: var(--tailwind-empty, /*!*/ /*!*/);
+  --font-variant-numeric-figure: var(--tailwind-empty, /*!*/ /*!*/);
+  --font-variant-numeric-spacing: var(--tailwind-empty, /*!*/ /*!*/);
+  --font-variant-numeric-fraction: var(--tailwind-empty, /*!*/ /*!*/);
+  font-variant-numeric: var(--font-variant-numeric-ordinal)
+    var(--font-variant-numeric-slashed-zero) var(--font-variant-numeric-figure)
+    var(--font-variant-numeric-spacing) var(--font-variant-numeric-fraction);
+}
+
+.ordinal {
+  --font-variant-numeric-ordinal: ordinal;
+}
+
+.slashed-zero {
+  --font-variant-numeric-slashed-zero: slashed-zero;
+}
+
+.transform {
+  --transform-translate-x: 0;
+  --transform-translate-y: 0;
+  --transform-rotate: 0;
+  --transform-skew-x: 0;
+  --transform-skew-y: 0;
+  --transform-scale-x: 1;
+  --transform-scale-y: 1;
+  transform: translateX(var(--transform-translate-x))
+    translateY(var(--transform-translate-y)) rotate(var(--transform-rotate))
+    skewX(var(--transform-skew-x)) skewY(var(--transform-skew-y))
+    scaleX(var(--transform-scale-x)) scaleY(var(--transform-scale-y));
+}
+
+.-translate-y-5 {
+  --transform-translate-y: -1.25rem;
+}

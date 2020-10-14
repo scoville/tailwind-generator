@@ -1,5 +1,8 @@
-/.idea
-/.vscode
-/src
-tsconfig.json
-tslint.json
+.idea/
+.vscode/
+.spago/
+.purs-repl
+.psc-ide-port
+src/
+node_modules/
+output/

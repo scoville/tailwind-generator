@@ -1,3 +1,7 @@
-.idea
-.vscode
-/node_modules
+.idea/
+.vscode/
+.spago/
+.purs-repl
+.psc-ide-port
+node_modules/
+output/
