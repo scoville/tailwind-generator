@@ -2,6 +2,8 @@ module Verbosity (Verbosity(..)) where
 
 import Prelude
 
+
+-- TODO: Coercible to Message.LogLevel
 data Verbosity
   = Silent
   | Info

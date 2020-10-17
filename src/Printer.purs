@@ -43,10 +43,8 @@ save = do
     PureScript -> formatFromFile "purs" >>= saveFile output "Tailwind.purs"
     Elm -> formatFromFile "elm" >>= saveFile output "Tailwind.elm"
     ReasonML -> do
-      code <- formatFromFile "re"
-      codei <- formatFromFile "rei"
-      saveFile output "tailwind.re" code
-      saveFile output "tailwind.rei" codei
+      formatFromFile "re" >>= saveFile output "tailwind.re"
+      formatFromFile "rei" >>= saveFile output "tailwind.rei"
     TypeScript -> formatFromFile "ts" >>= saveFile output "tailwind.ts"
     TypeScriptTypeLevel -> formatFromFile "ts-type-level" >>= saveFile output "tailwind.ts"
   where

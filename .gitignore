@@ -5,3 +5,4 @@
 .psc-ide-port
 node_modules/
 output/
+tailwind.css

@@ -11,8 +11,8 @@ import Data.Log.Level (LogLevel(..))
 import Data.Newtype (class Newtype)
 import Effect.Aff (Aff, Error)
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Console as Console
+import Effect.Class (class MonadEffect)
+import Effect.Class.Console as Console
 import Options (Options)
 import Type.Equality (class TypeEquals, from)
 import Verbosity as Verbosity
@@ -53,4 +53,4 @@ runAppM (AppM m) options = runReaderT (runLoggerT m (filterByVerbosity logMessag
     Verbosity.Debug -> minimumLevel Debug
     Verbosity.Silent -> const $ const $ pure unit
 
-  logMessage message = liftEffect $ prettyFormatter message >>= Console.log
+  logMessage = prettyFormatter >=> Console.log
