@@ -6,6 +6,7 @@
   , "foreign-generic"
   , "generics-rep"
   , "handlebars"
+  , "monad-logger"
   , "node-fs"
   , "node-path"
   , "optparse"
