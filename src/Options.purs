@@ -24,6 +24,7 @@ langParser =
     "elm" -> Right Elm
     "typescript" -> Right TypeScript
     "typescript-type-level" -> Right TypeScriptTypeLevel
+    "typescript-type-level-2" -> Right TypeScriptTypeLevel2
     lang -> Left $ "\"" <> lang <> "\" is not a valid lang"
 
 verbosityParser :: ReadM Verbosity
@@ -49,7 +50,7 @@ optionsParser = ado
       ( long "lang"
           <> short 'l'
           <> metavar "LANG"
-          <> help "Language used in generated code (elm|reasonml|typescript|typescript-type-level|purescript)"
+          <> help "Language used in generated code (purescript|elm|reasonml|typescript|typescript-type-level|typescript-type-level-2)"
       )
   output <-
     strOption

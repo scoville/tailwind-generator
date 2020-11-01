@@ -47,5 +47,6 @@ save = do
       formatFromFile "rei" >>= saveFile output "tailwind.rei"
     TypeScript -> formatFromFile "ts" >>= saveFile output "tailwind.ts"
     TypeScriptTypeLevel -> formatFromFile "ts-type-level" >>= saveFile output "tailwind.ts"
+    TypeScriptTypeLevel2 -> formatFromFile "ts-type-level-2" >>= saveFile output "tailwind.ts"
   where
   saveFile output path = catchAndKill <<< writeTextFile UTF8 (output <> "/" <> path)

@@ -10,6 +10,7 @@ data Lang
   | ReasonML
   | TypeScript
   | TypeScriptTypeLevel
+  | TypeScriptTypeLevel2
 
 derive instance eqLang :: Eq Lang
 
