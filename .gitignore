@@ -1,4 +1,4 @@
 /.vscode
 /target
-Tailwind.*
+Output.*
 styles.css
