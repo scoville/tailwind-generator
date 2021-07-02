@@ -1,0 +1,21 @@
+{
+  "name": "style-generator",
+  "version": "2.0.0-alpha-macos-1",
+  "main": "index.js",
+  "repository": "git@github.com:scoville/tailwind-generator.git",
+  "author": "Kevin COMBRIAT <kevin@sc0ville.com>",
+  "license": "MIT",
+  "files": [
+    "npm/**/*"
+  ],
+  "bin": {
+    "style-generator": "./npm/run.js"
+  },
+  "scripts": {
+    "postinstall": "node npm/install.js",
+    "preinstall": "node npm/uninstall.js"
+  },
+  "dependencies": {
+    "@cloudflare/binary-install": "^0.2.0"
+  }
+}

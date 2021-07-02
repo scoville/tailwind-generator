@@ -1,4 +1,6 @@
 /.vscode
+/builds
+/node_modules
 /target
 Output.*
 styles.css
