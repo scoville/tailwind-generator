@@ -1,18 +1,11 @@
 use anyhow::Result;
 use clap::Clap;
-use lang::Lang;
 use log::info;
 use std::fs::create_dir_all;
-
-use crate::lang::{
-    ElmTemplate, PurescriptTemplate, RescriptTemplate, RescriptiTemplate, RustTemplate,
-    TypescriptTemplate,
+use style_generator_core::{
+    extract_classes_from_file, resolve_path, write_code_to_file, ElmTemplate, Lang,
+    PurescriptTemplate, RescriptTemplate, RescriptiTemplate, TypescriptTemplate,
 };
-use crate::utils::{extract_classes_from_file, resolve_path, write_code_to_file};
-
-mod classes_parser;
-mod lang;
-mod utils;
 
 #[derive(Clap, Debug)]
 #[clap(name = "style-generator")]
@@ -78,12 +71,6 @@ fn main() -> Result<()> {
             write_code_to_file(
                 RescriptiTemplate { classes },
                 resolve_path(output, output_filename, "resi")?,
-            )?;
-        }
-        Lang::Rust => {
-            write_code_to_file(
-                RustTemplate { classes },
-                resolve_path(output, output_filename, "rs")?,
             )?;
         }
         Lang::Typescript => {

@@ -1,4 +1,5 @@
 const { Binary } = require("@cloudflare/binary-install");
+const package = require("../../package.json");
 
 const os = require("os");
 
@@ -16,7 +17,7 @@ function getPlatform() {
 
 function getBinary() {
   const platform = getPlatform();
-  const version = require("../package.json").version;
+  const version = package.version;
   const url = `https://github.com/scoville/tailwind-generator/releases/download/v${version}/style-generator-${platform}.tar.gz`;
   const name = "style-generator";
 

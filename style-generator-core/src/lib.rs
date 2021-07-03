@@ -2,44 +2,18 @@ use anyhow::{anyhow, Result};
 use askama::Template;
 use cssparser::{Parser, ParserInput, RuleListParser};
 use log::info;
+use reqwest::IntoUrl;
 use std::fmt::Display;
 use std::io::{Read, Write};
 use std::{fs::File, path::Path};
 
 use crate::classes_parser::ClassesParser;
 
-macro_rules! replace_first_char {
-    ($escaped_class_name:ident, $($char:literal => $replace_with:expr),*) => (
-        match $escaped_class_name.chars().nth(0) {
-            $(Some($char) => $escaped_class_name.replace_range(..1, $replace_with),)+
-            _ => (),
-        }
-    )
-}
+pub use lang::*;
 
-pub fn escape_class_name(class: String) -> String {
-    let mut escaped_class_name = class;
-
-    replace_first_char!(escaped_class_name,
-        '-' => "neg-",
-        '0' => "zero-",
-        '1' => "one-",
-        '2' => "two-",
-        '3' => "three-",
-        '4' => "four-",
-        '5' => "five-",
-        '6' => "six-",
-        '7' => "seven-",
-        '8' => "eight-",
-        '9' => "nine-"
-    );
-
-    escaped_class_name
-        .replace(":-", "-neg-")
-        .replace("/", "-over-")
-        .replace(":", "-")
-        .replace(".", "-dot-")
-}
+mod classes_parser;
+mod lang;
+mod utils;
 
 pub fn extract_classes_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
     let mut file = File::open(path)?;
@@ -48,7 +22,19 @@ pub fn extract_classes_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<String>>
 
     file.read_to_string(&mut file_content)?;
 
-    let mut parser_input = ParserInput::new(file_content.as_str());
+    extract_classes_from_text(file_content)
+}
+
+pub fn extract_classes_from_url<U: IntoUrl>(url: U) -> Result<Vec<String>> {
+    let css = reqwest::blocking::get(url)?;
+
+    let css_text = css.text()?;
+
+    extract_classes_from_text(css_text)
+}
+
+fn extract_classes_from_text<R: AsRef<str>>(css_text: R) -> Result<Vec<String>> {
+    let mut parser_input = ParserInput::new(css_text.as_ref());
 
     let mut parser = Parser::new(&mut parser_input);
 
@@ -57,12 +43,16 @@ pub fn extract_classes_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<String>>
     let rule_list_parser = RuleListParser::new_for_stylesheet(&mut parser, ClassesParser);
 
     for class in rule_list_parser.into_iter().flatten() {
-        classes.extend(vec![class]);
+        classes.push(class);
     }
 
     classes.sort();
 
     classes.dedup();
+
+    if classes.is_empty() {
+        return Err(anyhow!("no css classes found, are you sure the provided css source contains any classes and is valid?"));
+    }
 
     Ok(classes)
 }
@@ -91,7 +81,7 @@ pub fn resolve_path<P: AsRef<Path> + Display>(
 
     let output_path = output_path
         .to_str()
-        .ok_or_else(|| anyhow!("Path is invalid"))?;
+        .ok_or_else(|| anyhow!("path is invalid"))?;
 
     Ok(format!("{}.{}", output_path, extension))
 }

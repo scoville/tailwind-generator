@@ -1,0 +1,13 @@
+[package]
+authors = ["Kevin COMBRIAT <kevin@sc0ville.com>"]
+edition = "2018"
+name = "style-generator-core"
+version = "0.1.0"
+
+[dependencies]
+anyhow = "1.0.41"
+askama = "0.10.5"
+convert_case = "0.4.0"
+cssparser = "0.28.1"
+log = "0.4.14"
+reqwest = {version = "0.11.4", features = ["blocking"]}
