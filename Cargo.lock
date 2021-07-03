@@ -577,12 +577,34 @@ name = "style-generator"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "askama",
  "clap",
- "convert_case",
- "cssparser",
  "env_logger",
  "log",
+ "style-generator-core",
+]
+
+[[package]]
+name = "style-generator-core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "askama",
+ "convert_case",
+ "cssparser",
+ "log",
+]
+
+[[package]]
+name = "style-generator-macro"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "lazy_static",
+ "quote",
+ "serde",
+ "style-generator-core",
+ "syn",
+ "toml",
 ]
 
 [[package]]

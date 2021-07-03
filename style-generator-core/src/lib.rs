@@ -8,38 +8,11 @@ use std::{fs::File, path::Path};
 
 use crate::classes_parser::ClassesParser;
 
-macro_rules! replace_first_char {
-    ($escaped_class_name:ident, $($char:literal => $replace_with:expr),*) => (
-        match $escaped_class_name.chars().nth(0) {
-            $(Some($char) => $escaped_class_name.replace_range(..1, $replace_with),)+
-            _ => (),
-        }
-    )
-}
+pub use lang::*;
 
-pub fn escape_class_name(class: String) -> String {
-    let mut escaped_class_name = class;
-
-    replace_first_char!(escaped_class_name,
-        '-' => "neg-",
-        '0' => "zero-",
-        '1' => "one-",
-        '2' => "two-",
-        '3' => "three-",
-        '4' => "four-",
-        '5' => "five-",
-        '6' => "six-",
-        '7' => "seven-",
-        '8' => "eight-",
-        '9' => "nine-"
-    );
-
-    escaped_class_name
-        .replace(":-", "-neg-")
-        .replace("/", "-over-")
-        .replace(":", "-")
-        .replace(".", "-dot-")
-}
+mod classes_parser;
+mod lang;
+mod utils;
 
 pub fn extract_classes_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
     let mut file = File::open(path)?;
@@ -57,7 +30,7 @@ pub fn extract_classes_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<String>>
     let rule_list_parser = RuleListParser::new_for_stylesheet(&mut parser, ClassesParser);
 
     for class in rule_list_parser.into_iter().flatten() {
-        classes.extend(vec![class]);
+        classes.push(class);
     }
 
     classes.sort();
