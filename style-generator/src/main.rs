@@ -34,7 +34,7 @@ fn main() -> Result<()> {
     let Opts {
         input,
         lang,
-        output,
+        output: output_directory,
         output_filename,
     } = Opts::parse();
 
@@ -51,21 +51,30 @@ fn main() -> Result<()> {
 
     info!("{} classes found", classes.len());
 
-    info!("Creating directory {} if needed", output);
+    info!("Creating directory {} if needed", output_directory);
 
-    create_dir_all(output.clone())?;
+    create_dir_all(output_directory.clone())?;
 
     match lang {
         Lang::Elm => {
+            let template =
+                ElmTemplate::new(output_directory.as_str(), output_filename.as_str(), classes)?;
+
             write_code_to_file(
-                ElmTemplate { classes },
-                resolve_path(output, output_filename, "elm")?,
+                template,
+                resolve_path(output_directory, output_filename, "elm")?,
             )?;
         }
         Lang::Purescript => {
+            let template = PurescriptTemplate::new(
+                output_directory.as_str(),
+                output_filename.as_str(),
+                classes,
+            )?;
+
             write_code_to_file(
-                PurescriptTemplate { classes },
-                resolve_path(output, output_filename, "purs")?,
+                template,
+                resolve_path(output_directory, output_filename, "purs")?,
             )?;
         }
         Lang::Rescript => {
@@ -73,30 +82,30 @@ fn main() -> Result<()> {
                 RescriptTemplate {
                     classes: classes.clone(),
                 },
-                resolve_path(output.clone(), output_filename.clone(), "res")?,
+                resolve_path(output_directory.clone(), output_filename.clone(), "res")?,
             )?;
 
             write_code_to_file(
                 RescriptiTemplate { classes },
-                resolve_path(output, output_filename, "resi")?,
+                resolve_path(output_directory, output_filename, "resi")?,
             )?;
         }
         Lang::Typescript => {
             write_code_to_file(
                 TypescriptTemplate { classes },
-                resolve_path(output, output_filename, "ts")?,
+                resolve_path(output_directory, output_filename, "ts")?,
             )?;
         }
         Lang::TypescriptType1 => {
             write_code_to_file(
                 TypescriptType1Template { classes },
-                resolve_path(output, output_filename, "ts")?,
+                resolve_path(output_directory, output_filename, "ts")?,
             )?;
         }
         Lang::TypescriptType2 => {
             write_code_to_file(
                 TypescriptType2Template { classes },
-                resolve_path(output, output_filename, "ts")?,
+                resolve_path(output_directory, output_filename, "ts")?,
             )?;
         }
     }

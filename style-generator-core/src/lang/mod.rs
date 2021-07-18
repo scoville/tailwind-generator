@@ -6,6 +6,7 @@ pub mod rescript;
 pub mod typescript;
 pub mod typescript_type_1;
 pub mod typescript_type_2;
+mod utils;
 
 pub use elm::ElmTemplate;
 pub use purescript::PurescriptTemplate;
