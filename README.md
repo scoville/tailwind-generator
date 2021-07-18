@@ -25,7 +25,7 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -i, --input <input>                        CSS file to parse and generate code from
+    -i, --input <input>                        CSS file path or URL to parse and generate code from
     -l, --lang <lang>
             Language used in generated code (elm|purescript|rescript|rust|typescript|typescript-type-1|typescript-type-2)"
 
@@ -35,6 +35,28 @@ OPTIONS:
 ```
 
 `style-generator` uses [env_logger](https://docs.rs/env_logger/0.8.4/env_logger/) under the hood, so you can prefix your command with `RUST_LOG=info` for a more verbose output, the binary is silent by default:
+
+### Examples
+
+Display the help message:
+
+```bash
+style-generator -h
+```
+
+Generates a TypeScript file called `css.ts` in the `generated` folder from the Tailwind css file:
+
+```bash
+style-generator -i https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css -l typescript -f css -o generated
+```
+
+Same as above but generated from a file:
+
+```bash
+style-generator -i ./styles.css -l typescript -f css -o generated
+```
+
+Generates a PureScript file and shows logs:
 
 ```bash
 RUST_LOG=info style-generator -i ./styles.css -l purescript -f Css
@@ -220,6 +242,8 @@ Some languages allow for more flexibility using macros or some other technics. R
 _ReScript users: this tool doesn't offer any other support than the generator (see above) yet, in the meantime you can take a look at [this ppx](https://github.com/dylanirlbeck/tailwind-ppx)._
 
 #### Rust (rust)
+
+_TODO: Add notice about installation after release._
 
 In Rust, a `style-generator.toml` file is required and must be located at the root of your crate. It's pretty simple (as of today) and should look like this:
 

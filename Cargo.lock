@@ -1125,6 +1125,7 @@ dependencies = [
  "env_logger",
  "log",
  "style-generator-core",
+ "url",
 ]
 
 [[package]]

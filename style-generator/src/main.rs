@@ -3,15 +3,15 @@ use clap::Clap;
 use log::info;
 use std::fs::create_dir_all;
 use style_generator_core::{
-    extract_classes_from_file, resolve_path, write_code_to_file, ElmTemplate, Lang,
-    PurescriptTemplate, RescriptTemplate, RescriptiTemplate, TypescriptTemplate,
+    extract_classes_from_file, extract_classes_from_url, resolve_path, write_code_to_file,
+    ElmTemplate, Lang, PurescriptTemplate, RescriptTemplate, RescriptiTemplate, TypescriptTemplate,
     TypescriptType1Template, TypescriptType2Template,
 };
 
 #[derive(Clap, Debug)]
 #[clap(name = "style-generator")]
 struct Opts {
-    /// CSS file to parse and generate code from
+    /// CSS file path or URL to parse and generate code from
     #[clap(short, long)]
     input: String,
 
@@ -38,9 +38,16 @@ fn main() -> Result<()> {
         output_filename,
     } = Opts::parse();
 
-    info!("CSS will be read from {}", input);
-
-    let classes = extract_classes_from_file(input)?;
+    let classes = match url::Url::parse(input.as_str()) {
+        Err(_) => {
+            info!("Extracting from file {}", input);
+            extract_classes_from_file(input)?
+        }
+        Ok(url) => {
+            info!("Extracting from URL {}", url);
+            extract_classes_from_url(url)?
+        }
+    };
 
     info!("{} classes found", classes.len());
 
