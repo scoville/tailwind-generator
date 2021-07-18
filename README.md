@@ -31,7 +31,7 @@ OPTIONS:
 
     -o, --output <output>                      Directory for generated code [default: ./]
     -f, --output-filename <output-filename>
-            Filename (without extension) used for the generated code [default: Output]
+            Filename (without extension) used for the generated code [default: css]
 ```
 
 `style-generator` uses [env_logger](https://docs.rs/env_logger/0.8.4/env_logger/) under the hood, so you can prefix your command with `RUST_LOG=info` for a more verbose output, the binary is silent by default:
@@ -73,7 +73,7 @@ RUST_LOG=info style-generator -i ./styles.css -l purescript -f Css
 A simple generator for TypeScript, it exports an [opaque type](https://en.wikipedia.org/wiki/Opaque_data_type) `CssClass`, a `join` function, and a set of `CssClass` "objects":
 
 ```ts
-import { join, textBlue100, rounded, border, borderBlue300 } from "./Output.ts";
+import { join, textBlue100, rounded, border, borderBlue300 } from "./css.ts";
 
 // ...
 
@@ -102,7 +102,7 @@ Cons:
 This generator doesn't generate any runtime code apart from the `join` function.
 
 ```ts
-import { join } from "./Output.ts";
+import { join } from "./css.ts";
 
 // ...
 
@@ -130,7 +130,7 @@ Cons:
 This generator doesn't generate any runtime code apart from the `css` function.
 
 ```ts
-import { css } from "./Output.ts";
+import { css } from "./css.ts";
 
 // ...
 
@@ -156,8 +156,6 @@ Cons:
 - Doesn't accept multiple spaces (not necessarily a cons for some)
 
 #### PureScript (purescript)
-
-_In PureScript you need to use the `-f|--output-filename` option and specify `Css`: `style-generator -i [path].css -l purescript -f Css`._
 
 In PureScript, a `CssClass` newtype is exported _without its constructor_ which derives some very useful type classes like Semigroup or Monoid offering a lot of flexibility:
 
@@ -203,6 +201,8 @@ css = join [ rounded, borderRed100 ]
 
 _You can also take a look at [this ppx](https://github.com/dylanirlbeck/tailwind-ppx) if you want to skip the code generation step. Both approach (code generation and ppx) have pros and cons._
 
+_In ReScript, the default filename `css` will be capitalized, you can override this behavior using the `-f|--output-filename` option._
+
 In ReScript 2 files are generated, one that contains the code and an interface file.
 
 Additionally to the class variables, 2 functions are exposed:
@@ -211,7 +211,7 @@ Additionally to the class variables, 2 functions are exposed:
 - `joinOpt`: takes a list of `option<cssClass>` and returns a string
 
 ```rescript
-open Output
+open Css
 
 <div className={join([textBlue100, rounded, border, borderBlue300])}>
   {"Hello!"->React.string}
@@ -219,8 +219,6 @@ open Output
 ```
 
 #### Elm (elm)
-
-_In Elm you need to use the `-f|--output-filename` option and specify `Css`: `style-generator -i [path].css -l elm -f Css`._
 
 Additionally to the generated classes, you'll get 2 useful functions:
 

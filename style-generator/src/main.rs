@@ -20,7 +20,7 @@ struct Opts {
     output: String,
 
     /// Filename (without extension) used for the generated code
-    #[clap(short = 'f', long, default_value = "Output")]
+    #[clap(short = 'f', long, default_value = "css")]
     output_filename: String,
 
     /// Language used in generated code (elm|purescript|rescript|rust|typescript|typescript-type-1|typescript-type-2)"
