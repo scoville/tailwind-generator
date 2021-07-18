@@ -2,8 +2,8 @@
 
 module Css exposing (
   CssClass,
+  classes,
   join,
-  unwrap,
   {% for class in classes %}{{class|name}}{% if !loop.last %},
   {% endif %}{% endfor %}
   )
@@ -15,13 +15,13 @@ import List
 type CssClass
     = CssClass String
 
-unwrap : List CssClass -> String
-unwrap cs =
+join : List CssClass -> String
+join cs =
     cs |> List.map (\(CssClass c) -> c) |> String.join " "
 
-join : List CssClass -> Html.Attribute msg
-join cs =
-    Attributes.class <| unwrap cs
+classes : List CssClass -> Html.Attribute msg
+classes cs =
+    Attributes.class <| join cs
 
 {% for class in classes %}
 {{class|name}} : CssClass

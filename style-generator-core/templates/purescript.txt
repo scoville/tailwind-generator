@@ -2,7 +2,7 @@
 
 module Css (
   CssClass,
-  make,
+  join,
   {% for class in classes %}{{class|name}}{% if !loop.last %},{% endif %}
   {% endfor %}
   ) where
@@ -23,7 +23,7 @@ module Css (
 --   [ rounded, fold $ Right wFull ]
 --
 -- Build the class name string:
---   make [ rounder, borderRed100 ]
+--   join [ rounded, borderRed100 ]
 
 import Data.Foldable (foldl)
 import Data.Newtype (class Newtype, wrap)
@@ -42,8 +42,8 @@ derive newtype instance semigroupCssClass :: Semigroup CssClass
 
 derive newtype instance monoidCssClass :: Monoid CssClass
 
-make :: Array CssClass -> String
-make =
+join :: Array CssClass -> String
+join =
   foldl
     ( \acc (CssClass className) -> case className of
         "" -> acc

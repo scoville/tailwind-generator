@@ -23,7 +23,7 @@ struct Opts {
     #[clap(short = 'f', long, default_value = "Output")]
     output_filename: String,
 
-    /// Language used in generated code (elm|purescript|rescript|typescript)"
+    /// Language used in generated code (elm|purescript|rescript|rust|typescript|typescript-type-1|typescript-type-2)"
     #[clap(short, long)]
     lang: Lang,
 }

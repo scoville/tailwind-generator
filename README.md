@@ -27,20 +27,28 @@ FLAGS:
 OPTIONS:
     -i, --input <input>                        CSS file to parse and generate code from
     -l, --lang <lang>
-            Language used in generated code (elm|purescript|rescript|typescript)"
+            Language used in generated code (elm|purescript|rescript|rust|typescript|typescript-type-1|typescript-type-2)"
 
     -o, --output <output>                      Directory for generated code [default: ./]
     -f, --output-filename <output-filename>
             Filename (without extension) used for the generated code [default: Output]
 ```
 
-`style-generator` uses [env_logger](https://docs.rs/env_logger/0.8.4/env_logger/) under the hood, so you can prefix your command with `RUST_LOG=info` for a more verbose output, the binary is silent by default.
+`style-generator` uses [env_logger](https://docs.rs/env_logger/0.8.4/env_logger/) under the hood, so you can prefix your command with `RUST_LOG=info` for a more verbose output, the binary is silent by default:
+
+```bash
+RUST_LOG=info style-generator -i ./styles.css -l purescript -f Css
+```
 
 ### Generators
 
+#### TypeScript
+
+`style-generator` offers three flavors for TypeScript code generation, let's see and compare the three solutions.
+
 #### TypeScript (typescript)
 
-A simple generator for TypeScript, it exports an [opaque type](https://en.wikipedia.org/wiki/Opaque_data_type) `CssClass`, `join` function build, and a set of `CssClass` objects:
+A simple generator for TypeScript, it exports an [opaque type](https://en.wikipedia.org/wiki/Opaque_data_type) `CssClass`, a `join` function, and a set of `CssClass` "objects":
 
 ```ts
 import { join, textBlue100, rounded, border, borderBlue300 } from "./Output.ts";
@@ -58,7 +66,7 @@ Pros:
 - Very flexible
 - Compatible with most TypeScript versions
 - Safe, you can't pass any string to the `join` function
-- Autocompletation
+- Autocompletion
 
 Cons:
 
@@ -67,7 +75,7 @@ Cons:
 - Imports can be verbose (unless you use `import * as ...`)
 - Not the "standard" class names, `h-full` becomes `hFull`, etc...
 
-#### TypeScript type 1 (typescript-type-1)
+#### TypeScript type 1 (typescript-type-1) (recommended)
 
 This generator doesn't generate any runtime code apart from the `join` function.
 
@@ -123,8 +131,123 @@ Cons:
 - Not as flexible as the 2 other generators
 - Compatible with TypeScript > 4.1 only
 - Type error can be hard to debug
-- Doesn't accept multiple spaces
+- Doesn't accept multiple spaces (not necessarily a cons for some)
+
+#### PureScript (purescript)
+
+_In PureScript you need to use the `-f|--output-filename` option and specify `Css`: `style-generator -i [path].css -l purescript -f Css`._
+
+In PureScript, a `CssClass` newtype is exported _without its constructor_ which derives some very useful type classes like Semigroup or Monoid offering a lot of flexibility:
+
+- Simple list of css classes:
+
+```purescript
+[ rounded, borderRed100 ]
+```
+
+- Add a class conditionally:
+
+```purescript
+[ if true then textBlue500 else textRed500 ] -- "text-blue-500"
+```
+
+- Add a class only if a condition is met, do nothing otherwise:
+
+```purescript
+[ guard true textBlue500 ] -- "text-blue-500"
+[ guard false rounded ] -- ""
+```
+
+- Handle Maybe, and other Foldable values:
+
+```purescript
+[ rounded, fold $ Nothing ] -- "rounded"
+[ rounded, fold $ Right wFull ] -- "rounded w-full"
+
+let mClass = Just borderRed100 in
+[ rounded, fold mClass ] -- "rounded border-red-100"
+```
+
+Example:
+
+```purescript
+import Css (rounded, borderRed100, join)
+
+css :: String
+css = join [ rounded, borderRed100 ]
+```
+
+#### ReScript (rescript)
+
+_You can also take a look at [this ppx](https://github.com/dylanirlbeck/tailwind-ppx) if you want to skip the code generation step. Both approach (code generation and ppx) have pros and cons._
+
+In ReScript 2 files are generated, one that contains the code and an interface file.
+
+Additionally to the class variables, 2 functions are exposed:
+
+- `join`: takes a list of `cssClass` and returns a string
+- `joinOpt`: takes a list of `option<cssClass>` and returns a string
+
+```rescript
+open Output
+
+<div className={join([textBlue100, rounded, border, borderBlue300])}>
+  {"Hello!"->React.string}
+</div>
+```
+
+#### Elm (elm)
+
+_In Elm you need to use the `-f|--output-filename` option and specify `Css`: `style-generator -i [path].css -l elm -f Css`._
+
+Additionally to the generated classes, you'll get 2 useful functions:
+
+- `classes`: takes a list of css classes and returns an `Html.Attribute msg` that can be used with any html element
+- `join`: performs a simple `List CssClass -> String` conversion when you need to compute a class name outside of an html element
+
+```elm
+import Css exposing (classes, textBlue100, rounded, border, borderBlue300);
+
+view _model =
+  div [ classes [ textBlue100, rounded, border, borderBlue300 ] ]
+    [ text "Hello!" ]
+```
+
+### No generators
+
+Some languages allow for more flexibility using macros or some other technics. Rust, Crystal, or the OCaml languages (Ocaml, ReasonML, and ReScript) are some of those languages, and the `style-generator` library offers some support for some of them.
+
+_ReScript users: this tool doesn't offer any other support than the generator (see above) yet, in the meantime you can take a look at [this ppx](https://github.com/dylanirlbeck/tailwind-ppx)._
 
 #### Rust (rust)
 
-_In progress._
+In Rust, a `style-generator.toml` file is required and must be located at the root of your crate. It's pretty simple (as of today) and should look like this:
+
+```toml
+[general]
+input = "./styles.css" # or input = {path = "./styles.css"}
+```
+
+Notice that urls are also supported, which can come in handy when testing or developing your application as in that case no file is needed:
+
+```toml
+[general]
+input = {url = "https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"}
+```
+
+If your config file is valid and the css can be found, you can now use the `css!` macro:
+
+```rust
+use style_generator_macro::css;
+
+// ...
+
+let style = css!(" rounded  border px-2  py-1");
+
+// Notice that extra white spaces have been removed at compile time
+assert_eq!(style, "rounded border px-2 py-1");
+```
+
+The css class names are validated and cleaned at compile time and the whole macro call is replaced by the provided string itself.
+
+_[Yew](https://yew.rs/) users: the `css!` macro can be used instead of the `classes!` one._
