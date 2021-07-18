@@ -5,6 +5,7 @@ use std::fs::create_dir_all;
 use style_generator_core::{
     extract_classes_from_file, resolve_path, write_code_to_file, ElmTemplate, Lang,
     PurescriptTemplate, RescriptTemplate, RescriptiTemplate, TypescriptTemplate,
+    TypescriptType1Template, TypescriptType2Template,
 };
 
 #[derive(Clap, Debug)]
@@ -76,6 +77,18 @@ fn main() -> Result<()> {
         Lang::Typescript => {
             write_code_to_file(
                 TypescriptTemplate { classes },
+                resolve_path(output, output_filename, "ts")?,
+            )?;
+        }
+        Lang::TypescriptType1 => {
+            write_code_to_file(
+                TypescriptType1Template { classes },
+                resolve_path(output, output_filename, "ts")?,
+            )?;
+        }
+        Lang::TypescriptType2 => {
+            write_code_to_file(
+                TypescriptType2Template { classes },
                 resolve_path(output, output_filename, "ts")?,
             )?;
         }
