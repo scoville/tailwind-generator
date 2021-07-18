@@ -1,6 +1,5 @@
 /.vscode
 /node_modules
 /target
-css.*
 styles.css
 yarn-error.log

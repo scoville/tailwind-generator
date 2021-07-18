@@ -6,8 +6,8 @@ use super::utils::generate_module_name;
 #[derive(Template)]
 #[template(path = "elm.txt")]
 pub struct ElmTemplate {
-    pub module_name: String,
     pub classes: Vec<String>,
+    pub module_name: String,
 }
 
 impl ElmTemplate {

@@ -17,10 +17,10 @@ struct Opts {
 
     /// Directory for generated code
     #[clap(short, long, default_value = "./")]
-    output: String,
+    output_directory: String,
 
     /// Filename (without extension) used for the generated code
-    #[clap(short = 'f', long, default_value = "css")]
+    #[clap(short = 'f', long)]
     output_filename: String,
 
     /// Language used in generated code (elm|purescript|rescript|rust|typescript|typescript-type-1|typescript-type-2)"
@@ -34,7 +34,7 @@ fn main() -> Result<()> {
     let Opts {
         input,
         lang,
-        output: output_directory,
+        output_directory,
         output_filename,
     } = Opts::parse();
 

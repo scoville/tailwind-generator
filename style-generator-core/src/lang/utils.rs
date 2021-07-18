@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Result};
-use convert_case::{Case, Casing};
 use std::path::Component;
 use std::path::Path;
 
@@ -14,7 +13,7 @@ pub fn generate_module_name(output_directory: &str, output_filename: &str) -> Re
                 let part = part
                     .to_str()
                     .ok_or_else(|| anyhow!("the directory path contains non unicode characters"))?
-                    .to_case(Case::Pascal);
+                    .to_string();
 
                 if acc.is_empty() {
                     return Ok(part);
@@ -27,11 +26,9 @@ pub fn generate_module_name(output_directory: &str, output_filename: &str) -> Re
         },
     )?;
 
-    let last = output_filename.to_case(Case::Pascal);
-
     if base.is_empty() {
-        return Ok(last);
+        return Ok(output_filename.to_string());
     }
 
-    Ok(format!("{}.{}", base, last))
+    Ok(format!("{}.{}", base, output_filename))
 }

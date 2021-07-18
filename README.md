@@ -12,29 +12,42 @@ This new version can be installed using npm/yarn (only on macos for now) using t
 
 To get help:
 
-`$ style-generator --help`
+```bash
+style-generator --help
+```
 
 ```
 style-generator
 
 USAGE:
-    style-generator [OPTIONS] --input <input> --lang <lang>
+    style-generator [OPTIONS] --input <input> --output-filename <output-filename> --lang <lang>
 
 FLAGS:
     -h, --help       Prints help information
     -V, --version    Prints version information
 
 OPTIONS:
-    -i, --input <input>                        CSS file path or URL to parse and generate code from
-    -l, --lang <lang>
-            Language used in generated code (elm|purescript|rescript|rust|typescript|typescript-type-1|typescript-type-2)"
+    -i, --input <input>
+            CSS file path or URL to parse and generate code from
 
-    -o, --output <output>                      Directory for generated code [default: ./]
+    -l, --lang <lang>
+            Language used in generated code (elm|purescript|rescript|rust|typescript|typescript-
+            type-1|typescript-type-2)"
+
+    -o, --output-directory <output-directory>    Directory for generated code [default: ./]
     -f, --output-filename <output-filename>
-            Filename (without extension) used for the generated code [default: css]
+            Filename (without extension) used for the generated code
 ```
 
-`style-generator` uses [env_logger](https://docs.rs/env_logger/0.8.4/env_logger/) under the hood, so you can prefix your command with `RUST_LOG=info` for a more verbose output, the binary is silent by default:
+`style-generator` uses [env_logger](https://docs.rs/env_logger/0.8.4/env_logger/) under the hood, so you can prefix your command with `RUST_LOG=info` for a more verbose output, the binary is silent by default.
+
+Warning: in PureScript and Elm, the provided filename and directory path will be used as the module name, make sure they follow the name conventions and are capitalized. For example:
+
+```bash
+style-generator -i ./styles.css -l purescript -o ./Foo/Bar -f Baz
+```
+
+Will generate a `./Foo/Bar/Baz.purs` file that defines a module called `Foo.Bar.Baz`.
 
 ### Examples
 
@@ -200,8 +213,6 @@ css = join [ rounded, borderRed100 ]
 #### ReScript (rescript)
 
 _You can also take a look at [this ppx](https://github.com/dylanirlbeck/tailwind-ppx) if you want to skip the code generation step. Both approach (code generation and ppx) have pros and cons._
-
-_In ReScript, the default filename `css` will be capitalized, you can override this behavior using the `-f|--output-filename` option._
 
 In ReScript 2 files are generated, one that contains the code and an interface file.
 
