@@ -1146,6 +1146,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "lazy_static",
+ "proc-macro-error",
  "quote",
  "serde",
  "style-generator-core",

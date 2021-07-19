@@ -281,6 +281,6 @@ let style = css!(" rounded  border px-2  py-1");
 assert_eq!(style, "rounded border px-2 py-1");
 ```
 
-The css class names are validated and cleaned at compile time and the whole macro call is replaced by the provided string itself.
+The css class names are validated and cleaned at compile time, duplicates are removed (and a compiler warning is emitted if you're using Rust nightly) and the whole macro call is replaced by the provided string itself.
 
 _[Yew](https://yew.rs/) users: the `css!` macro can be used instead of the `classes!` one._

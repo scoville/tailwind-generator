@@ -3,6 +3,7 @@ extern crate lazy_static;
 
 use anyhow::{anyhow, Result};
 use proc_macro::TokenStream;
+use proc_macro_error::{abort_call_site, emit_call_site_warning, proc_macro_error};
 use quote::quote;
 use serde::Deserialize;
 use std::{env, fs::File, io::Read, path::PathBuf};
@@ -61,6 +62,7 @@ lazy_static! {
 }
 
 #[proc_macro]
+#[proc_macro_error]
 pub fn css(input: TokenStream) -> TokenStream {
     let input: LitStr = parse_macro_input!(input);
 
@@ -73,11 +75,12 @@ pub fn css(input: TokenStream) -> TokenStream {
     // Validate class names
     for class in classes {
         if out_classes.contains(&class) {
-            panic!("Class already in class names list: {}", class)
+            emit_call_site_warning!("Class already in class names list: {}", class);
+            continue;
         }
 
         if !ACCEPTED_CLASSES.contains(&class.to_string()) {
-            panic!("Invalid class name: {}", class)
+            abort_call_site!("Invalid class name: {}", class)
         }
 
         out_classes.push(class);
@@ -85,10 +88,8 @@ pub fn css(input: TokenStream) -> TokenStream {
 
     let joined_classes = out_classes.join(" ");
 
-    let trimmed_classed = joined_classes.trim();
-
     let expanded = quote! {
-        #trimmed_classed
+        #joined_classes
     };
 
     expanded.into()
