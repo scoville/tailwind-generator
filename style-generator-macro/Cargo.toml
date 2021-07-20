@@ -8,11 +8,11 @@ version = "0.1.0"
 proc-macro = true
 
 [dependencies]
-anyhow = "1.0.41"
+anyhow = "1.0.42"
 lazy_static = "1.4.0"
 proc-macro-error = "1.0.4"
 quote = "1.0.9"
-serde = {version = "1.0.126", features = ["derive"]}
+serde = { version = "1.0.126", features = ["derive"] }
 style-generator-core = {path = "../style-generator-core"}
 syn = "1.0.73"
 toml = "0.5.8"
