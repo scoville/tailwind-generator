@@ -1,5 +1,7 @@
 /.vscode
+/builds
 /node_modules
 /target
 styles.css
 yarn-error.log
+*.tar.gz

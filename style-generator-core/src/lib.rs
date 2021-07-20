@@ -2,7 +2,6 @@ use anyhow::{anyhow, Result};
 use askama::Template;
 use cssparser::{Parser, ParserInput, RuleListParser};
 use log::info;
-use reqwest::IntoUrl;
 use std::fmt::Display;
 use std::io::{Read, Write};
 use std::{fs::File, path::Path};
@@ -25,10 +24,8 @@ pub fn extract_classes_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<String>>
     extract_classes_from_text(file_content)
 }
 
-pub fn extract_classes_from_url<U: IntoUrl>(url: U) -> Result<Vec<String>> {
-    let css = reqwest::blocking::get(url)?;
-
-    let css_text = css.text()?;
+pub fn extract_classes_from_url<U: AsRef<str>>(url: U) -> Result<Vec<String>> {
+    let css_text = ureq::get(url.as_ref()).call()?.into_string()?;
 
     extract_classes_from_text(css_text)
 }
