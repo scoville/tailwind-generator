@@ -2,9 +2,9 @@
 
 type cssClass
 
-let join: list<cssClass> => string
+let join: array<cssClass> => string
 
-let joinOpt: list<option<cssClass>> => string
+let joinOpt: array<option<cssClass>> => string
 
 {% for class in classes %}
 let {{class|name}}: cssClass

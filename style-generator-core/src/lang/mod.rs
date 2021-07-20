@@ -3,6 +3,7 @@ use std::str::FromStr;
 pub mod elm;
 pub mod purescript;
 pub mod rescript;
+pub mod rescript_type;
 pub mod typescript;
 pub mod typescript_type_1;
 pub mod typescript_type_2;
@@ -12,6 +13,7 @@ pub use elm::ElmTemplate;
 pub use purescript::PurescriptTemplate;
 pub use rescript::RescriptTemplate;
 pub use rescript::RescriptiTemplate;
+pub use rescript_type::RescriptTypeTemplate;
 pub use typescript::TypescriptTemplate;
 pub use typescript_type_1::TypescriptType1Template;
 pub use typescript_type_2::TypescriptType2Template;
@@ -21,6 +23,7 @@ pub enum Lang {
     Elm,
     Purescript,
     Rescript,
+    RescriptType,
     Typescript,
     TypescriptType1,
     TypescriptType2,
@@ -34,11 +37,12 @@ impl FromStr for Lang {
             "elm" => Ok(Lang::Elm),
             "purescript" => Ok(Lang::Purescript),
             "rescript" => Ok(Lang::Rescript),
+            "rescript-type" => Ok(Lang::RescriptType),
             "typescript" => Ok(Lang::Typescript),
             "typescript-type-1" => Ok(Lang::TypescriptType1),
             "typescript-type-2" => Ok(Lang::TypescriptType2),
             unknown_lang => Err(format!(
-                "\"{}\" is not a valid lang, should be one of (elm|purescript|rescript|rust|typescript|typescript-type-1|typescript-type-2)",
+                "\"{}\" is not a valid lang, should be one of (elm|purescript|rescript|rescript-type|rust|typescript|typescript-type-1|typescript-type-2)",
                 unknown_lang
             )),
         }

@@ -229,6 +229,20 @@ open Css
 </div>
 ```
 
+#### ReScript type (rescript-type)
+
+Since ReScript 9.1 we can safely coerce [polymorphic variants to strings](https://rescript-lang.org/blog/release-9-1#polymorphic-variants-for-numbers-and-strings). This generator leverages this new feature.
+
+It's lighter than the other ReScript generator, and it's possible to get class names autocompletion using the [Tailwind IntelliSense](https://marketplace.visualstudio.com/items?itemName=bradlc.vscode-tailwindcss) plugin.
+
+Example:
+
+```rescript
+<div className={Css.join([#"text-blue-100", #rounded, #border, #"border-blue-300"])}>
+  {"Hello!"->React.string}
+</div>
+```
+
 #### Elm (elm)
 
 Additionally to the generated classes, you'll get 2 useful functions:

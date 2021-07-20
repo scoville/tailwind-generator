@@ -4,9 +4,10 @@ use log::info;
 use std::fs::create_dir_all;
 use style_generator_core::{
     extract_classes_from_file, extract_classes_from_url, resolve_path, write_code_to_file,
-    ElmTemplate, Lang, PurescriptTemplate, RescriptTemplate, RescriptiTemplate, TypescriptTemplate,
-    TypescriptType1Template, TypescriptType2Template,
+    ElmTemplate, Lang, PurescriptTemplate, RescriptTemplate, RescriptTypeTemplate,
+    RescriptiTemplate, TypescriptTemplate, TypescriptType1Template, TypescriptType2Template,
 };
+use url::Url;
 
 #[derive(Clap, Debug)]
 #[clap(name = "style-generator")]
@@ -38,7 +39,7 @@ fn main() -> Result<()> {
         output_filename,
     } = Opts::parse();
 
-    let classes = match url::Url::parse(input.as_str()) {
+    let classes = match Url::parse(input.as_str()) {
         Err(_) => {
             info!("Extracting from file {}", input);
             extract_classes_from_file(input)?
@@ -88,6 +89,12 @@ fn main() -> Result<()> {
             write_code_to_file(
                 RescriptiTemplate { classes },
                 resolve_path(output_directory, output_filename, "resi")?,
+            )?;
+        }
+        Lang::RescriptType => {
+            write_code_to_file(
+                RescriptTypeTemplate { classes },
+                resolve_path(output_directory, output_filename, "res")?,
             )?;
         }
         Lang::Typescript => {
