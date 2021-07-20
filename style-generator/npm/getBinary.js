@@ -7,8 +7,8 @@ function getPlatform() {
   const type = os.type();
   const arch = os.arch();
 
-  // if (type === "Windows_NT" && arch === "x64") return "win64";
-  // if (type === "Linux" && arch === "x64") return "linux";
+  if (type === "Windows_NT" && arch === "x64") return "win64";
+  if (type === "Linux" && arch === "x64") return "linux";
   if (type === "Darwin" && arch === "x64") return "macos";
 
   throw new Error(`Unsupported platform: ${type} ${arch}`);

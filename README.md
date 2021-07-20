@@ -6,7 +6,7 @@ Generates code from _any_ valid css file (this CLI has been tested against compl
 
 ### Installation notice
 
-This new version can be installed using npm/yarn (only on macos for now) using this command `[yarn add|npm install] https://github.com/scoville/tailwind-generator\#complete-refactor`.
+This new version can be installed using npm/yarn using this command `[yarn add|npm install] https://github.com/scoville/tailwind-generator\#complete-refactor`.
 
 ### Commands:
 
