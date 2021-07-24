@@ -29,22 +29,24 @@ style-generator --help
 ```
 
 ```
-style-generator
+style-generator 0.1.0
 
 USAGE:
-    style-generator [OPTIONS] --input <input> --output-filename <output-filename> --lang <lang>
+    style-generator [FLAGS] [OPTIONS] --input <input> --output-filename <output-filename> --lang <lang>
 
 FLAGS:
     -h, --help       Prints help information
     -V, --version    Prints version information
+    -w, --watch      Watch for changes in the provided css file and regenarate the code (doesn't
+                     work with URL)
 
 OPTIONS:
     -i, --input <input>
             CSS file path or URL to parse and generate code from
 
     -l, --lang <lang>
-            Language used in generated code (elm|purescript|rescript|typescript|typescript-
-            type-1|typescript-type-2)"
+            Language used in generated code (elm|purescript|rescript|typescript|typescript-type-
+            1|typescript-type-2)"
 
     -o, --output-directory <output-directory>    Directory for generated code [default: ./]
     -f, --output-filename <output-filename>
@@ -89,6 +91,17 @@ style-generator \
   -o generated
 ```
 
+Same as above and regenerate code on `styles.css` file change:
+
+```bash
+style-generator \
+  -i ./styles.css \
+  -l typescript \
+  -f css \
+  -o generated \
+  -w
+```
+
 Generates a PureScript file and shows logs:
 
 ```bash
@@ -97,6 +110,8 @@ RUST_LOG=info style-generator \
   -l purescript \
   -f Css
 ```
+
+_Warning: the `-w|--watch` mode is still experimental and some bugs are already known (the file is sometimes regenerated twice), use with care._
 
 ### Generators
 

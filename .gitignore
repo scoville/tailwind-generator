@@ -2,6 +2,6 @@
 /builds
 /node_modules
 /target
-styles.css
+*.css
 yarn-error.log
 *.tar.gz

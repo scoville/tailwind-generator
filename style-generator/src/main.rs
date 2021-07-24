@@ -1,13 +1,23 @@
 use anyhow::Result;
 use clap::{crate_version, Clap};
-use log::info;
+use log::{debug, info, warn};
+use notify::event::{DataChange, ModifyKind};
+use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use std::fs::create_dir_all;
+use std::path::{Path, PathBuf};
+use std::process;
+use std::sync::mpsc::channel;
 use style_generator_core::{
     extract_classes_from_file, extract_classes_from_url, resolve_path, write_code_to_file,
     ElmTemplate, Lang, PurescriptTemplate, RescriptTemplate, RescriptTypeTemplate,
     RescriptiTemplate, TypescriptTemplate, TypescriptType1Template, TypescriptType2Template,
 };
 use url::Url;
+
+enum InputType {
+    Path(PathBuf),
+    Url(Url),
+}
 
 #[derive(Clap, Debug)]
 #[clap(name = "style-generator", version = crate_version!())]
@@ -27,6 +37,10 @@ struct Opts {
     /// Language used in generated code (elm|purescript|rescript|typescript|typescript-type-1|typescript-type-2)"
     #[clap(short, long)]
     lang: Lang,
+
+    /// Watch for changes in the provided css file and regenarate the code (doesn't work with URL)
+    #[clap(short, long)]
+    watch: bool,
 }
 
 fn main() -> Result<()> {
@@ -37,16 +51,23 @@ fn main() -> Result<()> {
         lang,
         output_directory,
         output_filename,
+        watch,
     } = Opts::parse();
 
-    let classes = match Url::parse(input.as_str()) {
+    let input = match Url::parse(input.as_str()) {
         Err(_) => {
             info!("Extracting from file {}", input);
-            extract_classes_from_file(input)?
+
+            InputType::Path(PathBuf::from(input))
         }
         Ok(url) => {
             info!("Extracting from URL {}", url);
-            extract_classes_from_url(url)?
+
+            if watch {
+                warn!("You provided an URL as the css input, watch mode will not be activated")
+            }
+
+            InputType::Url(url)
         }
     };
 
@@ -54,10 +75,42 @@ fn main() -> Result<()> {
 
     create_dir_all(output_directory.as_str())?;
 
+    // Always run at least once, even in watch mode
+    run(
+        &input,
+        &lang,
+        output_directory.as_str(),
+        output_filename.as_str(),
+    )?;
+
+    if watch {
+        if let InputType::Path(ref path) = input {
+            run_watch(
+                path,
+                &lang,
+                output_directory.as_str(),
+                output_filename.as_str(),
+            )?
+        }
+    }
+
+    Ok(())
+}
+
+fn run(
+    input: &InputType,
+    lang: &Lang,
+    output_directory: &str,
+    output_filename: &str,
+) -> Result<()> {
+    let classes = match input {
+        InputType::Path(path) => extract_classes_from_file(path)?,
+        InputType::Url(url) => extract_classes_from_url(url)?,
+    };
+
     match lang {
         Lang::Elm => {
-            let template =
-                ElmTemplate::new(output_directory.as_str(), output_filename.as_str(), classes)?;
+            let template = ElmTemplate::new(output_directory, output_filename, classes)?;
 
             write_code_to_file(
                 template,
@@ -65,11 +118,7 @@ fn main() -> Result<()> {
             )?;
         }
         Lang::Purescript => {
-            let template = PurescriptTemplate::new(
-                output_directory.as_str(),
-                output_filename.as_str(),
-                classes,
-            )?;
+            let template = PurescriptTemplate::new(output_directory, output_filename, classes)?;
 
             write_code_to_file(
                 template,
@@ -79,7 +128,7 @@ fn main() -> Result<()> {
         Lang::Rescript => {
             write_code_to_file(
                 RescriptTemplate { classes: &classes },
-                resolve_path(output_directory.as_str(), output_filename.as_str(), "res")?,
+                resolve_path(output_directory, output_filename, "res")?,
             )?;
 
             write_code_to_file(
@@ -110,6 +159,46 @@ fn main() -> Result<()> {
                 TypescriptType2Template { classes },
                 resolve_path(output_directory, output_filename, "ts")?,
             )?;
+        }
+    }
+
+    Ok(())
+}
+
+fn run_watch(
+    path: &Path,
+    lang: &Lang,
+    output_directory: &str,
+    output_filename: &str,
+) -> Result<()> {
+    let (tx, rx) = channel();
+
+    let mut watcher = RecommendedWatcher::new(move |result| tx.send(result).unwrap())?;
+
+    watcher.watch(path, RecursiveMode::NonRecursive)?;
+
+    for result in rx {
+        match result {
+            Ok(Event {
+                kind: EventKind::Modify(ModifyKind::Data(DataChange::Content)),
+                ..
+            }) => run(
+                &InputType::Path(path.to_owned()),
+                lang,
+                output_directory,
+                output_filename,
+            )?,
+            Ok(Event {
+                kind: EventKind::Modify(ModifyKind::Name(notify::event::RenameMode::From)),
+                ..
+            }) => {
+                warn!("File {:?} was removed, exiting", path);
+                process::exit(2)
+            }
+            Ok(Event {
+                kind: event_kind, ..
+            }) => debug!("Unhandled event kind: {:?}", event_kind),
+            Err(error) => warn!("Watch error: {}", error),
         }
     }
 
