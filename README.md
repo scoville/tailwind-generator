@@ -8,7 +8,17 @@ Generates code from _any_ valid css file (this CLI has been tested against compl
 
 ### Installation notice
 
-This new version can be installed using npm/yarn using this command `[yarn add|npm install] https://github.com/scoville/tailwind-generator\#v2`.
+This new version can be installed using npm/yarn using this command:
+
+```bash
+npm install https://github.com/scoville/tailwind-generator\#v2
+```
+
+or
+
+```bash
+yarn add https://github.com/scoville/tailwind-generator\#v2
+```
 
 ### Commands:
 
