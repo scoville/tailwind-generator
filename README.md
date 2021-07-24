@@ -1,3 +1,7 @@
+## Deprecation notice
+
+_This version is no longer supported and you probably should take a look at the new one [here](https://github.com/scoville/tailwind-generator/tree/v2), it's faster, more flexibile, and it fixes some known bugs._
+
 ## Tailwind generator
 
 Generates code and css from a tailwind config file. Currently supports Elm, ReasonML, TypeScript, and PureScript!
