@@ -26,7 +26,7 @@ impl<'i> QualifiedRuleParser<'i> for ClassesParser {
         };
 
         // Consume the rest of the input
-        while let Ok(_token) = input.next() {
+        while let Ok(_) = input.next() {
             continue;
         }
 
@@ -40,7 +40,7 @@ impl<'i> QualifiedRuleParser<'i> for ClassesParser {
         input: &mut Parser<'i, 't>,
     ) -> Result<Self::QualifiedRule, ParseError<'i, Self::Error>> {
         // Consume the block input
-        while let Ok(_token) = input.next() {
+        while let Ok(_) = input.next() {
             continue;
         }
 
@@ -61,10 +61,17 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
         input: &mut Parser<'i, 't>,
     ) -> Result<AtRuleType<Self::PreludeNoBlock, Self::PreludeBlock>, ParseError<'i, Self::Error>>
     {
-        match (name.to_string().as_str(), input.next()) {
-            ("media", Ok(Token::ParenthesisBlock)) => Ok(AtRuleType::WithBlock(())),
+        let ret = match name.to_string().as_str() {
+            "media" => Ok(AtRuleType::WithBlock(())),
             _ => Ok(AtRuleType::WithoutBlock(())),
+        };
+
+        // Consume the rest of the input
+        while let Ok(_) = input.next() {
+            continue;
         }
+
+        ret
     }
 
     fn parse_block<'t>(
