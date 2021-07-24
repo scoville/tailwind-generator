@@ -1,5 +1,5 @@
 use anyhow::Result;
-use clap::Clap;
+use clap::{crate_version, Clap};
 use log::info;
 use std::fs::create_dir_all;
 use style_generator_core::{
@@ -10,7 +10,7 @@ use style_generator_core::{
 use url::Url;
 
 #[derive(Clap, Debug)]
-#[clap(name = "style-generator")]
+#[clap(name = "style-generator", version = crate_version!())]
 struct Opts {
     /// CSS file path or URL to parse and generate code from
     #[clap(short, long)]

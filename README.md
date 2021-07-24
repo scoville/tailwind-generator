@@ -287,7 +287,7 @@ Some languages allow for more flexibility using macros or an other mechanism. Ru
 
 _ReScript users: this tool doesn't offer any other support than the generator (see above) yet, in the meantime you can take a look at [this ppx](https://github.com/dylanirlbeck/tailwind-ppx)._
 
-#### Rust (rust)
+#### Rust
 
 _TODO: Add notice about installation after release._
 
