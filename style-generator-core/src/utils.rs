@@ -21,7 +21,7 @@ pub fn escape_class_name(class: &str) -> Cow<'_, str> {
     if class_chars
         .next()
         .map_or_else(|| false, char::is_alphabetic)
-        && class_chars.all(|char| char.is_lowercase() && (char.is_alphanumeric() || char == '_'))
+        && class_chars.all(|c| c == '_' || (c.is_alphanumeric() && c.is_lowercase()))
     {
         return class.into();
     }

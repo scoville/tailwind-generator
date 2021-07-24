@@ -26,7 +26,7 @@ impl<'i> QualifiedRuleParser<'i> for ClassesParser {
         };
 
         // Consume the rest of the input
-        while let Ok(_) = input.next() {
+        while input.next().is_ok() {
             continue;
         }
 
@@ -40,7 +40,7 @@ impl<'i> QualifiedRuleParser<'i> for ClassesParser {
         input: &mut Parser<'i, 't>,
     ) -> Result<Self::QualifiedRule, ParseError<'i, Self::Error>> {
         // Consume the block input
-        while let Ok(_) = input.next() {
+        while input.next().is_ok() {
             continue;
         }
 
@@ -67,7 +67,7 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
         };
 
         // Consume the rest of the input
-        while let Ok(_) = input.next() {
+        while input.next().is_ok() {
             continue;
         }
 
@@ -90,7 +90,8 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
             Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid))
         };
 
-        while let Ok(_token) = input.next() {
+        // Consume the rest of the block input
+        while input.next().is_ok() {
             continue;
         }
 
