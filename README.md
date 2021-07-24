@@ -72,19 +72,30 @@ style-generator -h
 Generates a TypeScript file called `css.ts` in the `generated` folder from the Tailwind css file:
 
 ```bash
-style-generator -i https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css -l typescript -f css -o generated
+style-generator \
+  -i https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css \
+  -l typescript \
+  -f css \
+  -o generated
 ```
 
 Same as above but generated from a file:
 
 ```bash
-style-generator -i ./styles.css -l typescript -f css -o generated
+style-generator \
+  -i ./styles.css \
+  -l typescript \
+  -f css \
+  -o generated
 ```
 
 Generates a PureScript file and shows logs:
 
 ```bash
-RUST_LOG=info style-generator -i ./styles.css -l purescript -f Css
+RUST_LOG=info style-generator \
+  -i ./styles.css \
+  -l purescript \
+  -f Css
 ```
 
 ### Generators
