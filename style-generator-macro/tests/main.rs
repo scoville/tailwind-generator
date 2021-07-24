@@ -2,6 +2,11 @@ use style_generator_macro::css;
 
 #[test]
 fn it_cleans_and_validate_class_names() {
+    assert_eq!(
+        css!("rounded  md:slashed-zero  stacked-fractions space-y-60  "),
+        "rounded md:slashed-zero stacked-fractions space-y-60"
+    );
+
     assert_eq!(css!("rounded    "), "rounded");
 
     assert_eq!(css!("rounded   rounded "), "rounded");

@@ -7,30 +7,31 @@ use cssparser::{
 pub struct ClassesParser;
 
 impl<'i> QualifiedRuleParser<'i> for ClassesParser {
-    type Prelude = String;
-    type QualifiedRule = String;
+    type Prelude = Vec<String>;
+    type QualifiedRule = Vec<String>;
     type Error = ();
 
     fn parse_prelude<'t>(
         &mut self,
         input: &mut Parser<'i, 't>,
     ) -> Result<Self::Prelude, ParseError<'i, Self::Error>> {
-        let ret = if let Ok(Token::Delim('.')) = input.next() {
-            if let Ok(Token::Ident(ident)) = input.next() {
-                Ok(ident.to_string())
-            } else {
-                Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid))
-            }
-        } else {
-            Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid))
-        };
+        let mut ret = Vec::new();
 
-        // Consume the rest of the input
-        while input.next().is_ok() {
-            continue;
+        while !input.is_exhausted() {
+            match input.next() {
+                Ok(Token::Delim('.')) => {
+                    if let Ok(Token::Ident(ident)) = input.next() {
+                        ret.push(ident.to_string());
+                    } else {
+                        return Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid));
+                    }
+                }
+                Ok(_) => (),
+                Err(_) => return Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid)),
+            }
         }
 
-        ret
+        Ok(ret)
     }
 
     fn parse_block<'t>(
@@ -51,7 +52,7 @@ impl<'i> QualifiedRuleParser<'i> for ClassesParser {
 impl<'i> AtRuleParser<'i> for ClassesParser {
     type PreludeNoBlock = ();
     type PreludeBlock = ();
-    type AtRule = String;
+    type AtRule = Vec<String>;
     type Error = ();
 
     #[allow(clippy::type_complexity)]
@@ -80,21 +81,22 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
         _start: &ParserState,
         input: &mut Parser<'i, 't>,
     ) -> Result<Self::AtRule, ParseError<'i, ()>> {
-        let ret = if let Ok(Token::Delim('.')) = input.next() {
-            if let Ok(Token::Ident(ident)) = input.next() {
-                Ok(ident.to_string())
-            } else {
-                Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid))
-            }
-        } else {
-            Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid))
-        };
+        let mut ret = Vec::new();
 
-        // Consume the rest of the block input
-        while input.next().is_ok() {
-            continue;
+        while !input.is_exhausted() {
+            match input.next() {
+                Ok(Token::Delim('.')) => {
+                    if let Ok(Token::Ident(ident)) = input.next() {
+                        ret.push(ident.to_string());
+                    } else {
+                        return Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid));
+                    }
+                }
+                Ok(_) => (),
+                Err(_) => return Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid)),
+            }
         }
 
-        ret
+        Ok(ret)
     }
 }

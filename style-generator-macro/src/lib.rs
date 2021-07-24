@@ -71,7 +71,7 @@ pub fn css(input: TokenStream) -> TokenStream {
 
     let classes = input_value.split_whitespace().collect::<Vec<&str>>();
 
-    let mut out_classes = Vec::new();
+    let mut out_classes = String::new();
 
     // Validate class names
     for class in classes {
@@ -84,13 +84,15 @@ pub fn css(input: TokenStream) -> TokenStream {
             abort_call_site!("Invalid class name: {}", class)
         }
 
-        out_classes.push(class);
+        if out_classes.is_empty() {
+            out_classes.push_str(class);
+        } else {
+            out_classes.push_str(format!(" {}", class).as_str());
+        }
     }
 
-    let joined_classes = out_classes.join(" ");
-
     let expanded = quote! {
-        #joined_classes
+        #out_classes
     };
 
     expanded.into()

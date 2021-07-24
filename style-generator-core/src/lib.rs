@@ -1,7 +1,7 @@
 use anyhow::{anyhow, Result};
 use askama::Template;
 use cssparser::{Parser, ParserInput, RuleListParser};
-use log::{info, warn};
+use log::info;
 use std::ffi::OsStr;
 use std::fmt::Display;
 use std::io::{Read, Write};
@@ -45,31 +45,25 @@ where
 
     let mut parser = Parser::new(&mut parser_input);
 
-    let mut classes = vec![];
-
     let rule_list_parser = RuleListParser::new_for_stylesheet(&mut parser, ClassesParser);
 
-    for class in rule_list_parser.into_iter().flatten() {
-        if class.is_empty() {
-            warn!("Found an empty class");
-            continue;
-        }
+    let mut out_classes = rule_list_parser
+        .into_iter()
+        .flatten()
+        .flatten()
+        .collect::<Vec<String>>();
 
-        if classes.contains(&class) {
-            warn!("Found a potentially duplicated class name: {}", class);
-            continue;
-        }
-
-        classes.push(class);
-    }
-
-    if classes.is_empty() {
+    if out_classes.is_empty() {
         return Err(anyhow!("no css classes found, are you sure the provided css source contains at least one class and is valid?"));
     }
 
-    info!("{} classes found", classes.len());
+    out_classes.sort();
 
-    Ok(classes)
+    out_classes.dedup();
+
+    info!("{} classes found", out_classes.len());
+
+    Ok(out_classes)
 }
 
 pub fn write_code_to_file<P>(template: impl Template, path: P) -> Result<()>

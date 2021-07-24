@@ -59,34 +59,34 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_simple_cases() {
+    fn it_handles_simple_cases() {
         assert_eq!(escape_class_name("foo"), "foo");
         assert_eq!(escape_class_name("foo_bar"), "foo_bar");
         assert_eq!(escape_class_name("f42"), "f42");
     }
 
     #[test]
-    fn test_first_letter_is_alpha() {
+    fn it_replace_the_first_letter_when_non_alpha() {
         assert_eq!(escape_class_name("foo"), "foo");
         assert_eq!(escape_class_name("1foo_bar"), "one_foo_bar");
         assert_eq!(escape_class_name("-foo"), "neg_foo");
     }
 
     #[test]
-    fn test_smart_conversion() {
+    fn it_converts_some_characters_smartly() {
         assert_eq!(escape_class_name("foo:-bar"), "foo_neg_bar");
         assert_eq!(escape_class_name("foo/bar"), "foo_over_bar");
     }
 
     #[test]
-    fn test_lower_case() {
+    fn it_lower_all_characters_case() {
         assert_eq!(escape_class_name("foo"), "foo");
         assert_eq!(escape_class_name("fOO"), "foo");
         assert_eq!(escape_class_name("fOO_bAR"), "foo_bar");
     }
 
     #[test]
-    fn test_escape_special_characters() {
+    fn it_escapes_special_characters() {
         assert_eq!(escape_class_name("foo#"), "foo_");
         assert_eq!(escape_class_name("foo@"), "foo_");
         assert_eq!(escape_class_name("foo!"), "foo_");
