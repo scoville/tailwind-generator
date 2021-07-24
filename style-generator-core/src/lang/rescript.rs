@@ -2,14 +2,14 @@ use askama::Template;
 
 #[derive(Template)]
 #[template(path = "rescript.txt")]
-pub struct RescriptTemplate {
-    pub classes: Vec<String>,
+pub struct RescriptTemplate<'a> {
+    pub classes: &'a [String],
 }
 
 #[derive(Template)]
 #[template(path = "rescripti.txt")]
-pub struct RescriptiTemplate {
-    pub classes: Vec<String>,
+pub struct RescriptiTemplate<'a> {
+    pub classes: &'a [String],
 }
 
 mod filters {
@@ -19,6 +19,6 @@ mod filters {
     use crate::utils::escape_class_name;
 
     pub fn name(class: &str) -> Result<String> {
-        Ok(escape_class_name(class.to_string()).to_case(Case::Camel))
+        Ok(escape_class_name(class).to_case(Case::Camel))
     }
 }

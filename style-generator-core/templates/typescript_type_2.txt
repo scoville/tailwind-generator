@@ -17,4 +17,4 @@ export const css = <
     ? string
     : CssClass
   >(className: T): string =>
-  className
+  className;

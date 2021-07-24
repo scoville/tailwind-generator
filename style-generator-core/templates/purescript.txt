@@ -19,7 +19,7 @@ module {{module_name}} (
 --   [ guard true textBlue500 ]
 --
 -- Handle Maybe, and other Foldable values:
---   [ rounded, fold $ Nothing ]
+--   [ rounded, fold Nothing ]
 --   [ rounded, fold $ Right wFull ]
 --
 -- Build the class name string:

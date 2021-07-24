@@ -31,7 +31,7 @@ OPTIONS:
             CSS file path or URL to parse and generate code from
 
     -l, --lang <lang>
-            Language used in generated code (elm|purescript|rescript|rust|typescript|typescript-
+            Language used in generated code (elm|purescript|rescript|typescript|typescript-
             type-1|typescript-type-2)"
 
     -o, --output-directory <output-directory>    Directory for generated code [default: ./]
@@ -194,7 +194,7 @@ In PureScript, a `CssClass` newtype is exported _without its constructor_ which 
 - Handle Maybe, and other Foldable values:
 
 ```purescript
-[ rounded, fold $ Nothing ] -- "rounded"
+[ rounded, fold Nothing ] -- "rounded"
 [ rounded, fold $ Right wFull ] -- "rounded w-full"
 
 let mClass = Just borderRed100 in
@@ -260,7 +260,7 @@ view _model =
 
 ### No generators
 
-Some languages allow for more flexibility using macros or some other technics. Rust, Crystal, or the OCaml languages (Ocaml, ReasonML, and ReScript) are some of those languages, and the `style-generator` library offers some support for some of them.
+Some languages allow for more flexibility using macros or an other mechanism. Rust, Crystal, or the OCaml languages (Ocaml, ReasonML, and ReScript) are some of those languages, and the `style-generator` library offers support for a few of them.
 
 _ReScript users: this tool doesn't offer any other support than the generator (see above) yet, in the meantime you can take a look at [this ppx](https://github.com/dylanirlbeck/tailwind-ppx)._
 

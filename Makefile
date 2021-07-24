@@ -21,5 +21,5 @@ release: setup
 clean:
 	rm -fr builds *.tar.gz
 
-clean-all:
-	rm -fr builds target *.tar.gz
+clean-all: clean
+	rm -fr target

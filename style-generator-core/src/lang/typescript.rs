@@ -13,7 +13,7 @@ mod filters {
     use crate::utils::escape_class_name;
 
     pub fn name(class: &str) -> Result<String> {
-        let name = escape_class_name(class.to_string()).to_case(Case::Camel);
+        let name = escape_class_name(class).to_case(Case::Camel);
 
         // TODO: Escape more keywords
         Ok(match name.as_str() {

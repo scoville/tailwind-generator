@@ -42,7 +42,7 @@ impl FromStr for Lang {
             "typescript-type-1" => Ok(Lang::TypescriptType1),
             "typescript-type-2" => Ok(Lang::TypescriptType2),
             unknown_lang => Err(format!(
-                "\"{}\" is not a valid lang, should be one of (elm|purescript|rescript|rescript-type|rust|typescript|typescript-type-1|typescript-type-2)",
+                "\"{}\" is not a valid lang, should be one of (elm|purescript|rescript|rescript-type|typescript|typescript-type-1|typescript-type-2)",
                 unknown_lang
             )),
         }

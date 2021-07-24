@@ -10,7 +10,7 @@ use std::{env, fs::File, io::Read, path::PathBuf};
 use style_generator_core::{extract_classes_from_file, extract_classes_from_url};
 use syn::{parse_macro_input, LitStr};
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(untagged)]
 enum InputConfig {
     Simple(String),
@@ -54,9 +54,10 @@ fn read_config() -> Result<Config> {
 
 lazy_static! {
     static ref CONFIG: Config = read_config().expect("couldn't read config file");
-    static ref ACCEPTED_CLASSES: Vec<String> = match CONFIG.general.input.clone() {
-        InputConfig::Simple(path) | InputConfig::Path { path } => extract_classes_from_file(path),
-        InputConfig::Url { url } => extract_classes_from_url(url),
+    static ref ACCEPTED_CLASSES: Vec<String> = match CONFIG.general.input {
+        InputConfig::Simple(ref path) | InputConfig::Path { ref path } =>
+            extract_classes_from_file(path),
+        InputConfig::Url { ref url } => extract_classes_from_url(url),
     }
     .expect("css could not be loaded");
 }

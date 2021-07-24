@@ -24,7 +24,7 @@ struct Opts {
     #[clap(short = 'f', long)]
     output_filename: String,
 
-    /// Language used in generated code (elm|purescript|rescript|rust|typescript|typescript-type-1|typescript-type-2)"
+    /// Language used in generated code (elm|purescript|rescript|typescript|typescript-type-1|typescript-type-2)"
     #[clap(short, long)]
     lang: Lang,
 }
@@ -50,11 +50,9 @@ fn main() -> Result<()> {
         }
     };
 
-    info!("{} classes found", classes.len());
-
     info!("Creating directory {} if needed", output_directory);
 
-    create_dir_all(output_directory.clone())?;
+    create_dir_all(output_directory.as_str())?;
 
     match lang {
         Lang::Elm => {
@@ -80,14 +78,12 @@ fn main() -> Result<()> {
         }
         Lang::Rescript => {
             write_code_to_file(
-                RescriptTemplate {
-                    classes: classes.clone(),
-                },
-                resolve_path(output_directory.clone(), output_filename.clone(), "res")?,
+                RescriptTemplate { classes: &classes },
+                resolve_path(output_directory.as_str(), output_filename.as_str(), "res")?,
             )?;
 
             write_code_to_file(
-                RescriptiTemplate { classes },
+                RescriptiTemplate { classes: &classes },
                 resolve_path(output_directory, output_filename, "resi")?,
             )?;
         }

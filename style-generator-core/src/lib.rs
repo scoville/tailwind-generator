@@ -1,7 +1,8 @@
 use anyhow::{anyhow, Result};
 use askama::Template;
 use cssparser::{Parser, ParserInput, RuleListParser};
-use log::info;
+use log::{info, warn};
+use std::ffi::OsStr;
 use std::fmt::Display;
 use std::io::{Read, Write};
 use std::{fs::File, path::Path};
@@ -14,7 +15,10 @@ mod classes_parser;
 mod lang;
 mod utils;
 
-pub fn extract_classes_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<String>> {
+pub fn extract_classes_from_file<P>(path: P) -> Result<Vec<String>>
+where
+    P: AsRef<Path>,
+{
     let mut file = File::open(path)?;
 
     let mut file_content = String::new();
@@ -24,13 +28,19 @@ pub fn extract_classes_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<String>>
     extract_classes_from_text(file_content)
 }
 
-pub fn extract_classes_from_url<U: AsRef<str>>(url: U) -> Result<Vec<String>> {
+pub fn extract_classes_from_url<U>(url: U) -> Result<Vec<String>>
+where
+    U: AsRef<str>,
+{
     let css_text = ureq::get(url.as_ref()).call()?.into_string()?;
 
     extract_classes_from_text(css_text)
 }
 
-fn extract_classes_from_text<R: AsRef<str>>(css_text: R) -> Result<Vec<String>> {
+fn extract_classes_from_text<C>(css_text: C) -> Result<Vec<String>>
+where
+    C: AsRef<str>,
+{
     let mut parser_input = ParserInput::new(css_text.as_ref());
 
     let mut parser = Parser::new(&mut parser_input);
@@ -40,24 +50,32 @@ fn extract_classes_from_text<R: AsRef<str>>(css_text: R) -> Result<Vec<String>> 
     let rule_list_parser = RuleListParser::new_for_stylesheet(&mut parser, ClassesParser);
 
     for class in rule_list_parser.into_iter().flatten() {
+        if class.is_empty() {
+            warn!("Found an empty class");
+            continue;
+        }
+
+        if classes.contains(&class) {
+            warn!("Found a potentially duplicated class name: {}", class);
+            continue;
+        }
+
         classes.push(class);
     }
 
-    classes.sort();
-
-    classes.dedup();
-
     if classes.is_empty() {
-        return Err(anyhow!("no css classes found, are you sure the provided css source contains any classes and is valid?"));
+        return Err(anyhow!("no css classes found, are you sure the provided css source contains at least one class and is valid?"));
     }
+
+    info!("{} classes found", classes.len());
 
     Ok(classes)
 }
 
-pub fn write_code_to_file<P: AsRef<Path> + Display>(
-    template: impl Template,
-    path: P,
-) -> Result<()> {
+pub fn write_code_to_file<P>(template: impl Template, path: P) -> Result<()>
+where
+    P: AsRef<Path> + Display,
+{
     info!("Writing code into {}", path);
 
     let code = template.render()?;
@@ -69,16 +87,14 @@ pub fn write_code_to_file<P: AsRef<Path> + Display>(
     Ok(())
 }
 
-pub fn resolve_path<P: AsRef<Path> + Display>(
-    directory: P,
-    filename: String,
-    extension: &str,
-) -> Result<String> {
-    let output_path = Path::new(&directory.to_string()).join(filename);
+pub fn resolve_path<D, P>(directory: D, filename: P, extension: &str) -> Result<String>
+where
+    D: AsRef<OsStr>,
+    P: AsRef<Path>,
+{
+    let output_path = Path::new(&directory).join(filename);
 
-    let output_path = output_path
-        .to_str()
-        .ok_or_else(|| anyhow!("path is invalid"))?;
+    let output_path = output_path.to_string_lossy();
 
     Ok(format!("{}.{}", output_path, extension))
 }

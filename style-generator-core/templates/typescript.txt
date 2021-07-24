@@ -12,9 +12,11 @@ const buildCssClass = (className: string): CssClass => ({
   _value: className,
 });
 
-export const join = (classNames: CssClass[]): string => (
-  classNames.map(({ _value }) => _value).join(" ")
-);
+export const join = (classNames: CssClass[]): string =>
+  classNames.reduce(
+    (acc, { _value }) => acc === "" ? _value : `${acc} ${_value}`,
+    ""
+  );
 
 {% for class in classes %}
 export const {{class|name}}: CssClass = buildCssClass("{{class}}");
