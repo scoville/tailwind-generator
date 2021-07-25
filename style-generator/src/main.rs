@@ -173,7 +173,11 @@ fn run_watch(
 ) -> Result<()> {
     let (tx, rx) = channel();
 
-    let mut watcher = RecommendedWatcher::new(move |result| tx.send(result).unwrap())?;
+    let mut watcher = RecommendedWatcher::new(move |result| {
+        if tx.send(result).is_err() {
+            debug!("Couldn't send event message to watcher")
+        }
+    })?;
 
     watcher.watch(path, RecursiveMode::NonRecursive)?;
 

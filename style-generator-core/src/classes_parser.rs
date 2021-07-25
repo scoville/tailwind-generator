@@ -1,7 +1,7 @@
 use anyhow::Result;
 use cssparser::{
-    AtRuleParser, AtRuleType, BasicParseErrorKind, CowRcStr, ParseError, Parser, ParserState,
-    QualifiedRuleParser, Token,
+    AtRuleParser, AtRuleType, BasicParseError, BasicParseErrorKind, CowRcStr, ParseError, Parser,
+    ParserState, QualifiedRuleParser, Token,
 };
 
 pub struct ClassesParser;
@@ -17,8 +17,9 @@ impl<'i> QualifiedRuleParser<'i> for ClassesParser {
     ) -> Result<Self::Prelude, ParseError<'i, Self::Error>> {
         let mut ret = Vec::new();
 
-        while !input.is_exhausted() {
+        loop {
             match input.next() {
+                // Match a new potential class
                 Ok(Token::Delim('.')) => {
                     if let Ok(Token::Ident(ident)) = input.next() {
                         ret.push(ident.to_string());
@@ -26,7 +27,14 @@ impl<'i> QualifiedRuleParser<'i> for ClassesParser {
                         return Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid));
                     }
                 }
-                Ok(_) => (),
+                // Match any other token and ignore
+                Ok(_) => continue,
+                // Match end of input, break and return found classes
+                Err(BasicParseError {
+                    kind: BasicParseErrorKind::EndOfInput,
+                    ..
+                }) => break,
+                // Match any other error, break now and return an error
                 Err(_) => return Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid)),
             }
         }
@@ -83,8 +91,9 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
     ) -> Result<Self::AtRule, ParseError<'i, ()>> {
         let mut ret = Vec::new();
 
-        while !input.is_exhausted() {
+        loop {
             match input.next() {
+                // Match a new potential class
                 Ok(Token::Delim('.')) => {
                     if let Ok(Token::Ident(ident)) = input.next() {
                         ret.push(ident.to_string());
@@ -92,7 +101,14 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
                         return Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid));
                     }
                 }
-                Ok(_) => (),
+                // Match any other token and ignore
+                Ok(_) => continue,
+                // Match end of input, break and return found classes
+                Err(BasicParseError {
+                    kind: BasicParseErrorKind::EndOfInput,
+                    ..
+                }) => break,
+                // Match any other error, break now and return an error
                 Err(_) => return Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid)),
             }
         }

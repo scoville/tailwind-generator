@@ -30,6 +30,16 @@ struct Config {
 
 static CONFIG_FILE_NAME: &str = "style-generator.toml";
 
+lazy_static! {
+    static ref CONFIG: Config = read_config().expect("couldn't read config file");
+    static ref ACCEPTED_CLASSES: Vec<String> = match CONFIG.general.input {
+        InputConfig::Simple(ref path) | InputConfig::Path { ref path } =>
+            extract_classes_from_file(path),
+        InputConfig::Url { ref url } => extract_classes_from_url(url),
+    }
+    .expect("css could not be loaded");
+}
+
 fn read_config() -> Result<Config> {
     let root = PathBuf::from(env::var("CARGO_MANIFEST_DIR")?);
 
@@ -50,16 +60,6 @@ fn read_config() -> Result<Config> {
     let config = toml::from_str(content.as_str())?;
 
     Ok(config)
-}
-
-lazy_static! {
-    static ref CONFIG: Config = read_config().expect("couldn't read config file");
-    static ref ACCEPTED_CLASSES: Vec<String> = match CONFIG.general.input {
-        InputConfig::Simple(ref path) | InputConfig::Path { ref path } =>
-            extract_classes_from_file(path),
-        InputConfig::Url { ref url } => extract_classes_from_url(url),
-    }
-    .expect("css could not be loaded");
 }
 
 #[proc_macro]
