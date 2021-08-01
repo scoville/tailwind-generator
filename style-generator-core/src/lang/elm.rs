@@ -1,22 +1,23 @@
 use anyhow::Result;
 use askama::Template;
+use std::borrow::Cow;
 
 use super::utils::generate_module_name;
 
 #[derive(Template)]
 #[template(path = "elm.txt")]
-pub struct ElmTemplate {
+pub struct ElmTemplate<'a> {
     pub classes: Vec<String>,
-    pub module_name: String,
+    pub module_name: Cow<'a, str>,
 }
 
-impl ElmTemplate {
+impl<'a> ElmTemplate<'a> {
     pub fn new(
-        output_directory: &str,
-        output_filename: &str,
+        output_directory: &'a str,
+        output_filename: &'a str,
         classes: Vec<String>,
     ) -> Result<Self> {
-        let module_name = generate_module_name(output_directory, output_filename)?.to_string();
+        let module_name = generate_module_name(output_directory, output_filename)?;
 
         Ok(ElmTemplate {
             classes,

@@ -70,7 +70,7 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
         input: &mut Parser<'i, 't>,
     ) -> Result<AtRuleType<Self::PreludeNoBlock, Self::PreludeBlock>, ParseError<'i, Self::Error>>
     {
-        let ret = match name.to_string().as_str() {
+        let ret = match name.as_ref() {
             "media" => Ok(AtRuleType::WithBlock(())),
             _ => Ok(AtRuleType::WithoutBlock(())),
         };

@@ -17,8 +17,8 @@ mod filters {
 
         // TODO: Escape more keywords
         Ok(match name.as_str() {
-            "static" => "static_".to_string(),
-            name => name.to_string(),
+            "static" => String::from("static_"),
+            _ => name,
         })
     }
 }
