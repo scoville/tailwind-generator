@@ -1,15 +1,16 @@
 use askama::Template;
+use std::collections::HashSet;
 
 #[derive(Template)]
 #[template(path = "rescript.txt")]
 pub struct RescriptTemplate<'a> {
-    pub classes: &'a [String],
+    pub classes: &'a HashSet<String>,
 }
 
 #[derive(Template)]
 #[template(path = "rescripti.txt")]
 pub struct RescriptiTemplate<'a> {
-    pub classes: &'a [String],
+    pub classes: &'a HashSet<String>,
 }
 
 mod filters {

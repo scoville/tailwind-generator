@@ -1,13 +1,13 @@
 use anyhow::Result;
 use askama::Template;
-use std::borrow::Cow;
+use std::{borrow::Cow, collections::HashSet};
 
 use super::utils::generate_module_name;
 
 #[derive(Template)]
 #[template(path = "purescript.txt")]
 pub struct PurescriptTemplate<'a> {
-    pub classes: Vec<String>,
+    pub classes: HashSet<String>,
     pub module_name: Cow<'a, str>,
 }
 
@@ -15,7 +15,7 @@ impl<'a> PurescriptTemplate<'a> {
     pub fn new(
         output_directory: &'a str,
         output_filename: &'a str,
-        classes: Vec<String>,
+        classes: HashSet<String>,
     ) -> Result<Self> {
         let module_name = generate_module_name(output_directory, output_filename)?;
 

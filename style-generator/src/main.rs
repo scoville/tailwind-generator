@@ -1,27 +1,22 @@
 use anyhow::Result;
 use clap::{crate_version, Clap};
-use log::{debug, info, warn};
+use log::{debug, info, log_enabled, warn, Level};
 use notify::event::{DataChange, ModifyKind};
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use std::fs::create_dir_all;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process;
 use std::sync::mpsc::channel;
 use style_generator_core::{
-    extract_classes_from_file, extract_classes_from_url, resolve_path, write_code_to_file,
-    ElmTemplate, Lang, PurescriptTemplate, RescriptTemplate, RescriptTypeTemplate,
-    RescriptiTemplate, TypescriptTemplate, TypescriptType1Template, TypescriptType2Template,
+    classify_path, extract_classes_from_file, extract_classes_from_url, resolve_path,
+    write_code_to_file, ElmTemplate, InputType, Lang, PurescriptTemplate, RescriptTemplate,
+    RescriptTypeTemplate, RescriptiTemplate, TypescriptTemplate, TypescriptType1Template,
+    TypescriptType2Template,
 };
-use url::Url;
-
-enum InputType {
-    Path(PathBuf),
-    Url(Url),
-}
 
 #[derive(Clap, Debug)]
 #[clap(name = "style-generator", version = crate_version!())]
-struct Opts {
+struct Options {
     /// CSS file path or URL to parse and generate code from
     #[clap(short, long)]
     input: String,
@@ -46,28 +41,26 @@ struct Opts {
 fn main() -> Result<()> {
     env_logger::init();
 
-    let Opts {
+    let Options {
         input,
         lang,
         output_directory,
         output_filename,
         watch,
-    } = Opts::parse();
+    } = Options::parse();
 
-    let input = match Url::parse(input.as_str()) {
-        Err(_) => {
-            info!("Extracting from file {}", input);
+    let input = classify_path(input);
 
-            InputType::Path(PathBuf::from(input))
-        }
-        Ok(url) => {
-            info!("Extracting from URL {}", url);
+    if log_enabled!(Level::Info) || log_enabled!(Level::Warn) {
+        match input {
+            InputType::Path(ref path) => info!("Extracting from file {:?}", path),
+            InputType::Url(ref url) => {
+                info!("Extracting from URL {}", url);
 
-            if watch {
-                warn!("You provided an URL as the css input, watch mode will not be activated")
+                if watch {
+                    warn!("You provided an URL as the css input, watch mode will not be activated")
+                }
             }
-
-            InputType::Url(url)
         }
     };
 

@@ -6,7 +6,7 @@ use proc_macro::TokenStream;
 use proc_macro_error::{abort_call_site, emit_call_site_warning, proc_macro_error};
 use quote::quote;
 use serde::Deserialize;
-use std::{env, fs::File, io::Read, path::PathBuf};
+use std::{collections::HashSet, env, fs::File, io::Read, path::PathBuf};
 use style_generator_core::{extract_classes_from_file, extract_classes_from_url};
 use syn::{parse_macro_input, LitStr};
 
@@ -32,7 +32,7 @@ static CONFIG_FILE_NAME: &str = "style-generator.toml";
 
 lazy_static! {
     static ref CONFIG: Config = read_config().expect("couldn't read config file");
-    static ref ACCEPTED_CLASSES: Vec<String> = match CONFIG.general.input {
+    static ref ACCEPTED_CLASSES: HashSet<String> = match CONFIG.general.input {
         InputConfig::Simple(ref path) | InputConfig::Path { ref path } =>
             extract_classes_from_file(path),
         InputConfig::Url { ref url } => extract_classes_from_url(url),

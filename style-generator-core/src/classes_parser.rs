@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use anyhow::Result;
 use cssparser::{
     AtRuleParser, AtRuleType, BasicParseError, BasicParseErrorKind, CowRcStr, ParseError, Parser,
@@ -7,22 +9,22 @@ use cssparser::{
 pub struct ClassesParser;
 
 impl<'i> QualifiedRuleParser<'i> for ClassesParser {
-    type Prelude = Vec<String>;
-    type QualifiedRule = Vec<String>;
+    type Prelude = HashSet<String>;
+    type QualifiedRule = HashSet<String>;
     type Error = ();
 
     fn parse_prelude<'t>(
         &mut self,
         input: &mut Parser<'i, 't>,
     ) -> Result<Self::Prelude, ParseError<'i, Self::Error>> {
-        let mut ret = Vec::new();
+        let mut ret = HashSet::new();
 
         loop {
             match input.next() {
                 // Match a new potential class
                 Ok(Token::Delim('.')) => {
                     if let Ok(Token::Ident(ident)) = input.next() {
-                        ret.push(ident.to_string());
+                        ret.insert(ident.to_string());
                     } else {
                         return Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid));
                     }
@@ -60,7 +62,7 @@ impl<'i> QualifiedRuleParser<'i> for ClassesParser {
 impl<'i> AtRuleParser<'i> for ClassesParser {
     type PreludeNoBlock = ();
     type PreludeBlock = ();
-    type AtRule = Vec<String>;
+    type AtRule = HashSet<String>;
     type Error = ();
 
     #[allow(clippy::type_complexity)]
@@ -89,14 +91,14 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
         _start: &ParserState,
         input: &mut Parser<'i, 't>,
     ) -> Result<Self::AtRule, ParseError<'i, ()>> {
-        let mut ret = Vec::new();
+        let mut ret = HashSet::new();
 
         loop {
             match input.next() {
                 // Match a new potential class
                 Ok(Token::Delim('.')) => {
                     if let Ok(Token::Ident(ident)) = input.next() {
-                        ret.push(ident.to_string());
+                        ret.insert(ident.to_string());
                     } else {
                         return Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid));
                     }
