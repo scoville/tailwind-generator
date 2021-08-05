@@ -18,6 +18,28 @@ mod classes_parser;
 mod lang;
 mod utils;
 
+#[derive(Debug)]
+pub enum InputType {
+    Path(PathBuf),
+    Url(Url),
+}
+
+impl InputType {
+    pub fn from_path<S: AsRef<str>>(input: S) -> Self {
+        match Url::parse(input.as_ref()) {
+            Err(_) => InputType::Path(PathBuf::from(input.as_ref())),
+            Ok(url) => InputType::Url(url),
+        }
+    }
+
+    pub fn extract_classes(&self) -> Result<HashSet<String>> {
+        match self {
+            Self::Path(path) => extract_classes_from_file(path),
+            Self::Url(url) => extract_classes_from_url(url),
+        }
+    }
+}
+
 pub fn extract_classes_from_file<P>(path: P) -> Result<HashSet<String>>
 where
     P: AsRef<Path>,
@@ -90,17 +112,4 @@ where
     let output_path = output_path.to_string_lossy();
 
     Ok(format!("{}.{}", output_path, extension))
-}
-
-#[derive(Debug)]
-pub enum InputType {
-    Path(PathBuf),
-    Url(Url),
-}
-
-pub fn classify_path<S: AsRef<str>>(input: S) -> InputType {
-    match Url::parse(input.as_ref()) {
-        Err(_) => InputType::Path(PathBuf::from(input.as_ref())),
-        Ok(url) => InputType::Url(url),
-    }
 }

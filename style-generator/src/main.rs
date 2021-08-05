@@ -8,16 +8,15 @@ use std::path::Path;
 use std::process;
 use std::sync::mpsc::channel;
 use style_generator_core::{
-    classify_path, extract_classes_from_file, extract_classes_from_url, resolve_path,
-    write_code_to_file, ElmTemplate, InputType, Lang, PurescriptTemplate, RescriptTemplate,
-    RescriptTypeTemplate, RescriptiTemplate, TypescriptTemplate, TypescriptType1Template,
-    TypescriptType2Template,
+    resolve_path, write_code_to_file, ElmTemplate, InputType, Lang, PurescriptTemplate,
+    RescriptTemplate, RescriptTypeTemplate, RescriptiTemplate, TypescriptTemplate,
+    TypescriptType1Template, TypescriptType2Template,
 };
 
 #[derive(Clap, Debug)]
 #[clap(name = "style-generator", version = crate_version!())]
 struct Options {
-    /// CSS file path or URL to parse and generate code from
+    /// CSS file path and/or URL to parse and generate code from
     #[clap(short, long)]
     input: String,
 
@@ -49,7 +48,7 @@ fn main() -> Result<()> {
         watch,
     } = Options::parse();
 
-    let input = classify_path(input);
+    let input = InputType::from_path(input);
 
     if log_enabled!(Level::Info) || log_enabled!(Level::Warn) {
         match input {
@@ -96,10 +95,7 @@ fn run(
     output_directory: &str,
     output_filename: &str,
 ) -> Result<()> {
-    let classes = match input {
-        InputType::Path(path) => extract_classes_from_file(path)?,
-        InputType::Url(url) => extract_classes_from_url(url)?,
-    };
+    let classes = input.extract_classes()?;
 
     match lang {
         Lang::Elm => {

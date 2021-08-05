@@ -1,17 +1,17 @@
 use anyhow::Result;
 use clap::{crate_version, Clap};
+use futures::{stream, StreamExt};
 use glob::glob;
-use grep_matcher::{Captures, Matcher};
 use grep_regex::RegexMatcher;
-use grep_searcher::{sinks::UTF8, SearcherBuilder};
-use log::{error, info};
+use log::info;
 use regex::Regex;
-use std::{
-    borrow::Borrow, collections::HashSet, fs::File, path::PathBuf, process::exit, sync::Arc,
-};
-use style_generator_core::{
-    classify_path, extract_classes_from_file, extract_classes_from_url, InputType,
-};
+use std::{collections::HashSet, process::exit, sync::Arc};
+use style_generator_core::InputType;
+use tokio::sync::Mutex;
+
+use crate::lib::{extra_classes_from_path, open_file};
+
+mod lib;
 
 #[derive(Clap, Debug)]
 #[clap(name = "style-generator", version = crate_version!())]
@@ -31,48 +31,10 @@ struct Options {
     /// Classes splitter regex, will split the string captured with the `capture_regex` argument and split it into classes
     #[clap(long, default_value = r#"\s+"#)]
     split_regex: String,
-}
 
-async fn extra_classes_from_path<C, S>(
-    path: PathBuf,
-    capture_regex: C,
-    split_regex: S,
-) -> Result<HashSet<String>>
-where
-    C: Borrow<RegexMatcher>,
-    S: Borrow<Regex>,
-{
-    let file = File::open(path)?;
-
-    let mut found_classes = HashSet::new();
-
-    let mut searcher = SearcherBuilder::new().multi_line(true).build();
-
-    let capture_regex = capture_regex.borrow();
-
-    searcher.search_file(
-        capture_regex,
-        &file,
-        UTF8(|_, line| {
-            let mut captures = capture_regex.new_captures()?;
-
-            if capture_regex.captures(line.as_bytes(), &mut captures)? {
-                if let Some(m) = captures.get(1) {
-                    let classes = &line[m];
-
-                    for class in split_regex.borrow().split(classes) {
-                        if !class.is_empty() {
-                            found_classes.insert(class.to_string());
-                        }
-                    }
-                }
-            }
-
-            Ok(true)
-        }),
-    )?;
-
-    Ok(found_classes)
+    /// How many files can be read concurrently at most, setting this value to a big number might break depending on your system
+    #[clap(long, default_value = "128")]
+    max_opened_files: usize,
 }
 
 #[tokio::main]
@@ -84,6 +46,7 @@ async fn main() -> Result<()> {
         input_glob,
         capture_regex,
         split_regex,
+        max_opened_files,
     } = Options::parse();
 
     let capture_regex = Arc::new(RegexMatcher::new(capture_regex.as_str())?);
@@ -92,35 +55,47 @@ async fn main() -> Result<()> {
 
     info!("Validating {} against {}", input_glob, css_input);
 
-    let css_input = classify_path(css_input);
+    let css_input = InputType::from_path(css_input);
 
-    let mut glob = glob(input_glob.as_str())?;
+    // The classes contained in the provided css file/URL
+    let accepted_classes = css_input.extract_classes()?;
 
-    let accepted_classes = match css_input {
-        InputType::Path(path) => extract_classes_from_file(path),
-        InputType::Url(url) => extract_classes_from_url(url),
-    }?;
+    let glob = glob(input_glob.as_str())?;
 
-    let mut jobs = Vec::new();
+    // Open and extract classes from files concurrently
+    let jobs = stream::iter(glob)
+        .filter_map(|path| async move {
+            match path {
+                Ok(path) => open_file(path).await,
+                Err(_) => None,
+            }
+        })
+        .map(|file| {
+            let split_regex = split_regex.clone();
 
-    while let Some(Ok(path)) = glob.next() {
-        let split_regex = split_regex.clone();
+            let capture_regex = capture_regex.clone();
 
-        let capture_regex = capture_regex.clone();
+            tokio::spawn(extra_classes_from_path(file, capture_regex, split_regex))
+        })
+        .buffer_unordered(max_opened_files);
 
-        let job = tokio::spawn(extra_classes_from_path(path, capture_regex, split_regex));
+    let found_classes = Mutex::new(HashSet::new());
 
-        jobs.push(job);
-    }
+    // Insert the classes captured into the `found_classes` set
+    jobs.for_each(|job| async {
+        let mut found_classes = found_classes.lock().await;
 
-    let mut found_classes = HashSet::new();
-
-    for job in jobs {
-        for class in job.await?? {
-            found_classes.insert(class);
+        if let Ok(Ok(classes)) = job {
+            for class in classes {
+                found_classes.insert(class);
+            }
         }
-    }
+    })
+    .await;
 
+    let found_classes = found_classes.lock().await;
+
+    // Diff between whitelisted classes found the provided css and the classes found in the files
     let unknown_classes = found_classes
         .difference(&accepted_classes)
         .collect::<HashSet<&String>>();
@@ -133,7 +108,7 @@ async fn main() -> Result<()> {
 
     if !unknown_classes.is_empty() {
         for class in unknown_classes {
-            error!("Unkown class found {}", class);
+            eprintln!("Unkown class found {}", class);
         }
 
         exit(1);

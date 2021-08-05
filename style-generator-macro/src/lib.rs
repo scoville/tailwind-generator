@@ -47,7 +47,7 @@ fn read_config() -> Result<Config> {
 
     if !filename.exists() {
         return Err(anyhow!(
-            "couldn't find style-generator.toml configuration file but it is required",
+            "couldn't find required style-generator.toml configuration file",
         ));
     }
 
