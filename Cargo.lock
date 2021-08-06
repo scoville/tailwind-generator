@@ -1121,6 +1121,7 @@ dependencies = [
  "grep-regex",
  "grep-searcher",
  "log",
+ "notify",
  "regex",
  "style-generator-core",
  "tokio",
