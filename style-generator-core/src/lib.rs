@@ -2,10 +2,13 @@ use anyhow::{anyhow, Result};
 use askama::Template;
 use cssparser::{Parser, ParserInput, RuleListParser};
 use log::info;
+use std::collections::HashSet;
 use std::ffi::OsStr;
 use std::fmt::Display;
 use std::io::{Read, Write};
+use std::path::PathBuf;
 use std::{fs::File, path::Path};
+use url::Url;
 
 use crate::classes_parser::ClassesParser;
 
@@ -15,7 +18,29 @@ mod classes_parser;
 mod lang;
 mod utils;
 
-pub fn extract_classes_from_file<P>(path: P) -> Result<Vec<String>>
+#[derive(Debug)]
+pub enum InputType {
+    Path(PathBuf),
+    Url(Url),
+}
+
+impl InputType {
+    pub fn from_path<S: AsRef<str>>(input: S) -> Self {
+        match Url::parse(input.as_ref()) {
+            Err(_) => InputType::Path(PathBuf::from(input.as_ref())),
+            Ok(url) => InputType::Url(url),
+        }
+    }
+
+    pub fn extract_classes(&self) -> Result<HashSet<String>> {
+        match self {
+            Self::Path(path) => extract_classes_from_file(path),
+            Self::Url(url) => extract_classes_from_url(url),
+        }
+    }
+}
+
+pub fn extract_classes_from_file<P>(path: P) -> Result<HashSet<String>>
 where
     P: AsRef<Path>,
 {
@@ -28,7 +53,7 @@ where
     extract_classes_from_text(file_content)
 }
 
-pub fn extract_classes_from_url<U>(url: U) -> Result<Vec<String>>
+pub fn extract_classes_from_url<U>(url: U) -> Result<HashSet<String>>
 where
     U: AsRef<str>,
 {
@@ -37,7 +62,7 @@ where
     extract_classes_from_text(css_text)
 }
 
-fn extract_classes_from_text<C>(css_text: C) -> Result<Vec<String>>
+fn extract_classes_from_text<C>(css_text: C) -> Result<HashSet<String>>
 where
     C: AsRef<str>,
 {
@@ -47,19 +72,15 @@ where
 
     let rule_list_parser = RuleListParser::new_for_stylesheet(&mut parser, ClassesParser);
 
-    let mut out_classes = rule_list_parser
+    let out_classes = rule_list_parser
         .into_iter()
         .flatten()
         .flatten()
-        .collect::<Vec<String>>();
+        .collect::<HashSet<String>>();
 
     if out_classes.is_empty() {
         return Err(anyhow!("no css classes found, are you sure the provided css source contains at least one class and is valid?"));
     }
-
-    out_classes.sort();
-
-    out_classes.dedup();
 
     info!("{} classes found", out_classes.len());
 
