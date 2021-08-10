@@ -14,8 +14,6 @@ if (generate) {
 
 const validate = getBinary("validate");
 
-const validate = getBinary("generate");
-
 if (validate) {
   validate.uninstall();
 }
