@@ -1,5 +1,5 @@
 const { Binary } = require("@cloudflare/binary-install");
-const package = require("../../package.json");
+const package = require("../package.json");
 
 const os = require("os");
 
