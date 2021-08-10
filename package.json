@@ -1,19 +1,20 @@
 {
-  "name": "style-generator",
+  "name": "pyaco",
   "version": "2.0.0-beta-3",
   "main": "index.js",
   "repository": "git@github.com:scoville/tailwind-generator.git",
   "author": "Kevin COMBRIAT <kevin@sc0ville.com>",
   "license": "MIT",
   "files": [
-    "./style-generator/npm/**/*"
+    "./npm/**/*"
   ],
   "bin": {
-    "style-generator": "./style-generator/npm/run.js"
+    "pyaco-generate": "./npm/run-generate.js",
+    "pyaco-validate": "./npm/run-validate.js"
   },
   "scripts": {
-    "postinstall": "node ./style-generator/npm/install.js",
-    "preinstall": "node ./style-generator/npm/uninstall.js"
+    "postinstall": "node ./npm/install.js",
+    "preinstall": "node ./npm/uninstall.js"
   },
   "dependencies": {
     "@cloudflare/binary-install": "^0.2.0"

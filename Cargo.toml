@@ -1,2 +1,2 @@
 [workspace]
-members = ["style-generator", "style-generator-core", "style-generator-macro", "style-validate"]
+members = ["pyaco-generate", "pyaco-core", "pyaco-macro", "pyaco-validate"]
