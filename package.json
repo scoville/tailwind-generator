@@ -1,6 +1,6 @@
 {
   "name": "pyaco",
-  "version": "2.0.0-beta-3",
+  "version": "2.0.0-beta-4",
   "main": "index.js",
   "repository": "git@github.com:scoville/tailwind-generator.git",
   "author": "Kevin COMBRIAT <kevin@sc0ville.com>",
