@@ -13,6 +13,7 @@ grep-matcher = "0.1.5"
 grep-regex = "0.1.9"
 grep-searcher = "0.1.8"
 log = "0.4.14"
+notify = "5.0.0-pre.11"
 pyaco-core = {path = "../pyaco-core"}
 regex = "1.5.4"
 tokio = {version = "1.9.0", features = ["full"]}
