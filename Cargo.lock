@@ -905,6 +905,7 @@ dependencies = [
  "grep-regex",
  "grep-searcher",
  "log",
+ "notify",
  "pyaco-core",
  "regex",
  "tokio",
