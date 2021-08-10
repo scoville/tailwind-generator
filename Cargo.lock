@@ -854,6 +854,63 @@ dependencies = [
 ]
 
 [[package]]
+name = "pyaco-core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "askama",
+ "convert_case",
+ "cssparser",
+ "log",
+ "ureq",
+ "url",
+]
+
+[[package]]
+name = "pyaco-generate"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "env_logger",
+ "log",
+ "notify",
+ "pyaco-core",
+]
+
+[[package]]
+name = "pyaco-macro"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "lazy_static",
+ "proc-macro-error",
+ "pyaco-core",
+ "quote",
+ "serde",
+ "syn",
+ "toml",
+]
+
+[[package]]
+name = "pyaco-validate"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "env_logger",
+ "futures",
+ "glob",
+ "grep-matcher",
+ "grep-regex",
+ "grep-searcher",
+ "log",
+ "pyaco-core",
+ "regex",
+ "tokio",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1068,63 +1125,6 @@ name = "strsim"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
-
-[[package]]
-name = "style-generator"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "env_logger",
- "log",
- "notify",
- "style-generator-core",
-]
-
-[[package]]
-name = "style-generator-core"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "askama",
- "convert_case",
- "cssparser",
- "log",
- "ureq",
- "url",
-]
-
-[[package]]
-name = "style-generator-macro"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "lazy_static",
- "proc-macro-error",
- "quote",
- "serde",
- "style-generator-core",
- "syn",
- "toml",
-]
-
-[[package]]
-name = "style-validate"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "env_logger",
- "futures",
- "glob",
- "grep-matcher",
- "grep-regex",
- "grep-searcher",
- "log",
- "regex",
- "style-generator-core",
- "tokio",
-]
 
 [[package]]
 name = "syn"
