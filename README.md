@@ -13,13 +13,13 @@ Generates code from _any_ valid css file (this CLI has been tested against compl
 This new version can be installed using npm/yarn using this command:
 
 ```bash
-npm install https://github.com/scoville/tailwind-generator\#v2
+npm install https://github.com/scoville/tailwind-generator
 ```
 
 or
 
 ```bash
-yarn add https://github.com/scoville/tailwind-generator\#v2
+yarn add https://github.com/scoville/tailwind-generator
 ```
 
 ### Commands:
