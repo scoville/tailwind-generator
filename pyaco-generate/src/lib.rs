@@ -1,5 +1,5 @@
 use anyhow::Result;
-use clap::{crate_version, Clap};
+use clap::Clap;
 use log::{debug, info, log_enabled, warn, Level};
 use notify::event::{DataChange, ModifyKind};
 use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
@@ -14,8 +14,7 @@ use std::process;
 use std::sync::mpsc::channel;
 
 #[derive(Clap, Debug)]
-#[clap(name = "pyaco-generate", version = crate_version!())]
-struct Options {
+pub struct Options {
     /// CSS file path and/or URL to parse and generate code from
     #[clap(short, long)]
     input: String,
@@ -37,18 +36,8 @@ struct Options {
     watch: bool,
 }
 
-fn main() -> Result<()> {
-    env_logger::init();
-
-    let Options {
-        input,
-        lang,
-        output_directory,
-        output_filename,
-        watch,
-    } = Options::parse();
-
-    let input = InputType::from_path(input);
+pub fn run(options: Options) -> Result<()> {
+    let input = InputType::from_path(options.input);
 
     if log_enabled!(Level::Info) || log_enabled!(Level::Warn) {
         match input {
@@ -56,32 +45,32 @@ fn main() -> Result<()> {
             InputType::Url(ref url) => {
                 info!("Extracting from URL {}", url);
 
-                if watch {
+                if options.watch {
                     warn!("You provided an URL as the css input, watch mode will not be activated")
                 }
             }
         }
     };
 
-    info!("Creating directory {} if needed", output_directory);
+    info!("Creating directory {} if needed", options.output_directory);
 
-    create_dir_all(output_directory.as_str())?;
+    create_dir_all(options.output_directory.as_str())?;
 
     // Always run at least once, even in watch mode
-    run(
+    run_once(
         &input,
-        &lang,
-        output_directory.as_str(),
-        output_filename.as_str(),
+        &options.lang,
+        options.output_directory.as_str(),
+        options.output_filename.as_str(),
     )?;
 
-    if watch {
+    if options.watch {
         if let InputType::Path(ref path) = input {
             run_watch(
                 path,
-                &lang,
-                output_directory.as_str(),
-                output_filename.as_str(),
+                &options.lang,
+                options.output_directory.as_str(),
+                options.output_filename.as_str(),
             )?
         }
     }
@@ -89,7 +78,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn run(
+fn run_once(
     input: &InputType,
     lang: &Lang,
     output_directory: &str,
@@ -165,7 +154,7 @@ fn run_watch(
             Ok(Event {
                 kind: EventKind::Modify(ModifyKind::Data(DataChange::Content)),
                 ..
-            }) => run(
+            }) => run_once(
                 &InputType::Path(path.to_owned()),
                 lang,
                 output_directory,

@@ -2,4 +2,4 @@
 
 const getBinary = require("./getBinary");
 
-getBinary("validate").run();
+getBinary().run();

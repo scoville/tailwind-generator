@@ -1,5 +1,5 @@
 [package]
-authors = ["Kevin COMBRIAT <kevin@sc0ville.com>"]
+authors = ["Kévin COMBRIAT <kevin@sc0ville.com>"]
 edition = "2018"
 name = "pyaco-core"
 version = "0.1.0"

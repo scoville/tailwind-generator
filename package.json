@@ -3,14 +3,13 @@
   "version": "2.0.0-beta-4",
   "main": "index.js",
   "repository": "git@github.com:scoville/tailwind-generator.git",
-  "author": "Kevin COMBRIAT <kevin@sc0ville.com>",
+  "author": "Kévin COMBRIAT <kevin@sc0ville.com>",
   "license": "MIT",
   "files": [
     "./npm/**/*"
   ],
   "bin": {
-    "pyaco-generate": "./npm/run-generate.js",
-    "pyaco-validate": "./npm/run-validate.js"
+    "pyaco": "./npm/run.js"
   },
   "scripts": {
     "postinstall": "node ./npm/install.js",

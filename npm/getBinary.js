@@ -14,12 +14,12 @@ function getPlatform() {
   throw new Error(`Unsupported platform: ${type} ${arch}`);
 }
 
-function getBinary(name) {
+function getBinary() {
   const platform = getPlatform();
   const version = package.version;
-  const url = `https://github.com/scoville/tailwind-generator/releases/download/v${version}/pyaco-${name}-${platform}.tar.gz`;
+  const url = `https://github.com/scoville/tailwind-generator/releases/download/v${version}/pyaco-${platform}.tar.gz`;
 
-  return new Binary(url, { name: `pyaco-${name}` });
+  return new Binary(url, { name: "pyaco" });
 }
 
 module.exports = getBinary;
