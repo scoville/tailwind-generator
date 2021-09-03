@@ -15,23 +15,23 @@ use tokio::sync::Mutex;
 pub struct Options {
     /// CSS file path or URL used for code verification
     #[clap(short, long)]
-    css_input: String,
+    pub css_input: String,
 
     /// Glob pointing to the files to validate
     #[clap(short, long)]
-    input_glob: String,
+    pub input_glob: String,
 
     /// Classes matcher regex, must include a capture containing all the classes
     #[clap(long, default_value = r#"class="([^"]+)""#)]
-    capture_regex: String,
+    pub capture_regex: String,
 
     /// Classes splitter regex, will split the string captured with the `capture_regex` argument and split it into classes
     #[clap(long, default_value = r#"\s+"#)]
-    split_regex: String,
+    pub split_regex: String,
 
     /// How many files can be read concurrently at most, setting this value to a big number might break depending on your system
     #[clap(long, default_value = "128")]
-    max_opened_files: usize,
+    pub max_opened_files: usize,
 }
 
 pub async fn run(options: Options) -> Result<()> {
@@ -97,7 +97,7 @@ pub async fn run(options: Options) -> Result<()> {
 
     if !unknown_classes.is_empty() {
         for class in unknown_classes {
-            eprintln!("Unkown class found {}", class);
+            eprintln!("Unknown class found {}", class);
         }
 
         exit(1);

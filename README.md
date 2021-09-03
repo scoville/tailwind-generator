@@ -55,7 +55,7 @@ OPTIONS:
 
     -l, --lang <lang>
             Language used in generated code (elm|purescript|rescript|typescript|typescript-type-
-            1|typescript-type-2)"
+            1|typescript-type-2)
 
     -o, --output-directory <output-directory>    Directory for generated code [default: ./]
     -f, --output-filename <output-filename>

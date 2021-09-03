@@ -1,2 +1,2 @@
 [workspace]
-members = ["pyaco", "pyaco-generate", "pyaco-core", "pyaco-macro", "pyaco-validate"]
+members = ["pyaco", "pyaco-node", "pyaco-generate", "pyaco-core", "pyaco-macro", "pyaco-validate"]

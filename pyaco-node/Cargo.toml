@@ -1,0 +1,23 @@
+[package]
+authors = ["Kévin COMBRIAT <kevin@sc0ville.com>"]
+edition = "2018"
+exclude = ["pyaco.js", "index.node"]
+license = "ISC"
+name = "pyaco-node"
+version = "0.1.0"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+env_logger = "0.9.0"
+lazy_static = "1.4.0"
+pyaco-core = {path = "../pyaco-core"}
+pyaco-generate = {path = "../pyaco-generate"}
+pyaco-validate = {path = "../pyaco-validate"}
+tokio = {version = "1.11.0", features = ["full"]}
+
+[dependencies.neon]
+default-features = false
+features = ["napi-6"]
+version = "0.9"

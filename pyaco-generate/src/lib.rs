@@ -17,23 +17,23 @@ use std::sync::mpsc::channel;
 pub struct Options {
     /// CSS file path and/or URL to parse and generate code from
     #[clap(short, long)]
-    input: String,
+    pub input: String,
 
     /// Directory for generated code
     #[clap(short, long, default_value = "./")]
-    output_directory: String,
+    pub output_directory: String,
 
     /// Filename (without extension) used for the generated code
     #[clap(short = 'f', long)]
-    output_filename: String,
+    pub output_filename: String,
 
-    /// Language used in generated code (elm|purescript|rescript|typescript|typescript-type-1|typescript-type-2)"
+    /// Language used in generated code (elm|purescript|rescript|typescript|typescript-type-1|typescript-type-2)
     #[clap(short, long)]
-    lang: Lang,
+    pub lang: Lang,
 
     /// Watch for changes in the provided css file and regenarate the code (doesn't work with URL)
     #[clap(short, long)]
-    watch: bool,
+    pub watch: bool,
 }
 
 pub fn run(options: Options) -> Result<()> {
