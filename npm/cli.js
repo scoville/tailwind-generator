@@ -1,4 +1,5 @@
-#!/usr/bin/env node
+// An alternative CLI that uses the node native module
+// and acts as a polyfill for unsupported platforms.
 
 const yargs = require("yargs/yargs");
 const { hideBin } = require("yargs/helpers");

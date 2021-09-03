@@ -1,5 +1,15 @@
 #!/usr/bin/env node
 
-const getBinary = require("./getBinary");
+const { getBinary, getPlatform } = require("./getBinary");
 
-getBinary().run();
+const platform = getPlatform();
+
+if (platform) {
+  // Run the Rust binary on supported platforms
+  const binary = getBinary(platform);
+
+  binary.run();
+} else {
+  // And the Node facade otherwise
+  require("./cli");
+}

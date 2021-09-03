@@ -1,7 +1,6 @@
 [package]
 authors = ["Kévin COMBRIAT <kevin@sc0ville.com>"]
 edition = "2018"
-exclude = ["pyaco.js", "index.node"]
 license = "ISC"
 name = "pyaco-node"
 version = "0.1.0"

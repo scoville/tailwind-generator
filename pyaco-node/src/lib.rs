@@ -69,7 +69,9 @@ fn validate(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 
     let input_glob = get!(cx, options, "inputGlob");
 
-    // TODO: Use `conv` or another crate to make this safer
+    // The following will not panic, but the result is not reliable and might
+    // change depending on the platform (32/64 bits).
+    // Since we don't expect big numbers to be provided it should work fine though.
     let max_opened_files = get!(cx, options, "maxOpenedFiles", JsNumber) as usize;
 
     let split_regex = get!(cx, options, "splitRegex");

@@ -3,6 +3,8 @@ const package = require("../package.json");
 
 const os = require("os");
 
+const baseUrl = `https://github.com/scoville/tailwind-generator/releases/download`;
+
 function getPlatform() {
   const type = os.type();
   const arch = os.arch();
@@ -11,15 +13,27 @@ function getPlatform() {
   if (type === "Linux" && arch === "x64") return "linux";
   if (type === "Darwin" && arch === "x64") return "macos";
 
-  throw new Error(`Unsupported platform: ${type} ${arch}`);
+  console.warn(
+    `Unknown platform: ${type} ${arch}.
+Defaulting to the node native module which might be slower.
+`
+  );
+
+  return null;
 }
 
-function getBinary() {
-  const platform = getPlatform();
-  const version = package.version;
-  const url = `https://github.com/scoville/tailwind-generator/releases/download/v${version}/pyaco-${platform}.tar.gz`;
-
-  return new Binary(url, { name: "pyaco" });
+function getNativeNodeUrl() {
+  return `${baseUrl}/v${package.version}/pyaco-index.node`;
 }
 
-module.exports = getBinary;
+function getBinary(platform) {
+  return new Binary(`${baseUrl}/v${package.version}/pyaco-${platform}.tar.gz`, {
+    name: "pyaco",
+  });
+}
+
+exports.getBinary = getBinary;
+
+exports.getNativeNodeUrl = getNativeNodeUrl;
+
+exports.getPlatform = getPlatform;

@@ -1,21 +1,28 @@
 {
   "name": "pyaco",
   "version": "2.0.0-beta-5",
-  "main": "index.js",
   "repository": "git@github.com:scoville/tailwind-generator.git",
   "author": "Kévin COMBRIAT <kevin@sc0ville.com>",
   "license": "MIT",
   "files": [
     "./npm/**/*"
   ],
+  "main": "./npm/index.js",
   "bin": {
     "pyaco": "./npm/run.js"
   },
   "scripts": {
+    "preinstall": "node ./npm/uninstall.js",
     "postinstall": "node ./npm/install.js",
-    "preinstall": "node ./npm/uninstall.js"
+    "release-pyaco-node": "cargo-cp-artifact -ac pyaco-node ./releases/pyaco-index.node -- cargo build --package pyaco-node --message-format=json-render-diagnostics --release"
   },
   "dependencies": {
-    "@cloudflare/binary-install": "^0.2.0"
+    "@cloudflare/binary-install": "^0.2.0",
+    "axios": "^0.21.3",
+    "yargs": "^17.1.1"
+  },
+  "devDependencies": {
+    "cargo-cp-artifact": "^0.1.5",
+    "yarn": "^1.22.11"
   }
 }
