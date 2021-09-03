@@ -8,11 +8,11 @@ version = "0.1.0"
 proc-macro = true
 
 [dependencies]
-anyhow = "1.0.42"
+anyhow = "1.0.43"
 lazy_static = "1.4.0"
 proc-macro-error = "1.0.4"
 pyaco-core = {path = "../pyaco-core"}
 quote = "1.0.9"
-serde = {version = "1.0.126", features = ["derive"]}
-syn = "1.0.73"
+serde = { version = "1.0.130", features = ["derive"] }
+syn = "1.0.75"
 toml = "0.5.8"
