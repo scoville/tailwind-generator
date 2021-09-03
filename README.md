@@ -13,13 +13,13 @@ Generates code from _any_ valid css file (this CLI has been tested against compl
 This new version can be installed using npm/yarn using this command:
 
 ```bash
-npm install https://github.com/scoville/tailwind-generator\#v2
+npm install https://github.com/scoville/tailwind-generator
 ```
 
 or
 
 ```bash
-yarn add https://github.com/scoville/tailwind-generator\#v2
+yarn add https://github.com/scoville/tailwind-generator
 ```
 
 ### Commands:
@@ -27,14 +27,15 @@ yarn add https://github.com/scoville/tailwind-generator\#v2
 To get help:
 
 ```bash
-pyaco-generate --help
+pyaco generate --help
 ```
 
 ```
-pyaco-generate 0.1.0
+pyaco-generate
+Generate code from a css input
 
 USAGE:
-    pyaco-generate [FLAGS] [OPTIONS] --input <input> --output-filename <output-filename> --lang <lang>
+    pyaco generate [FLAGS] [OPTIONS] --input <input> --output-filename <output-filename> --lang <lang>
 
 FLAGS:
     -h, --help       Prints help information
@@ -44,7 +45,7 @@ FLAGS:
 
 OPTIONS:
     -i, --input <input>
-            CSS file path or URL to parse and generate code from
+            CSS file path and/or URL to parse and generate code from
 
     -l, --lang <lang>
             Language used in generated code (elm|purescript|rescript|typescript|typescript-type-
@@ -55,12 +56,12 @@ OPTIONS:
             Filename (without extension) used for the generated code
 ```
 
-`pyaco-generate` uses [env_logger](https://docs.rs/env_logger/0.8.4/env_logger/) under the hood, so you can prefix your command with `RUST_LOG=info` for a more verbose output, the binary is silent by default.
+`pyaco generate` uses [env_logger](https://docs.rs/env_logger/0.8.4/env_logger/) under the hood, so you can prefix your command with `RUST_LOG=info` for a more verbose output, the binary is silent by default.
 
 Warning: in PureScript and Elm, the provided filename and directory path will be used as the module name, make sure they follow the name conventions and are capitalized. For example:
 
 ```bash
-pyaco-generate -i ./styles.css -l purescript -o ./Foo/Bar -f Baz
+pyaco generate -i ./styles.css -l purescript -o ./Foo/Bar -f Baz
 ```
 
 Will generate a `./Foo/Bar/Baz.purs` file that defines a module called `Foo.Bar.Baz`.
@@ -70,13 +71,13 @@ Will generate a `./Foo/Bar/Baz.purs` file that defines a module called `Foo.Bar.
 Display the help message:
 
 ```bash
-pyaco-generate -h
+pyaco generate -h
 ```
 
 Generates a TypeScript file called `css.ts` in the `generated` folder from the Tailwind css file:
 
 ```bash
-pyaco-generate \
+pyaco generate \
   -i https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css \
   -l typescript \
   -f css \
@@ -86,7 +87,7 @@ pyaco-generate \
 Same as above but generated from a file:
 
 ```bash
-pyaco-generate \
+pyaco generate \
   -i ./styles.css \
   -l typescript \
   -f css \
@@ -96,7 +97,7 @@ pyaco-generate \
 Same as above and regenerate code on `styles.css` file change:
 
 ```bash
-pyaco-generate \
+pyaco generate \
   -i ./styles.css \
   -l typescript \
   -f css \
@@ -107,7 +108,7 @@ pyaco-generate \
 Generates a PureScript file and shows logs:
 
 ```bash
-RUST_LOG=info pyaco-generate \
+RUST_LOG=info pyaco generate \
   -i ./styles.css \
   -l purescript \
   -f Css
@@ -119,7 +120,7 @@ _Warning: the `-w|--watch` mode is still experimental and some bugs are already 
 
 #### TypeScript
 
-`pyaco-generate` offers three flavors for TypeScript code generation, let's see and compare the three solutions.
+`pyaco generate` offers three flavors for TypeScript code generation, let's see and compare the three solutions.
 
 #### TypeScript (typescript)
 
@@ -341,9 +342,9 @@ _[Yew](https://yew.rs/) users: the `css!` macro can be used instead of the `clas
 
 ### Pyaco validate: A type safe CSS / code validator _Experimental_
 
-The `pyaco-validate` command will take a css input (path or URL) and a glob of files to validate. If a class is used in a file but not present in the css input an error is displayed.
+The `pyaco validate` command will take a css input (path or URL) and a glob of files to validate. If a class is used in a file but not present in the css input an error is displayed.
 
-`pyaco-validate` will not force you to change your workflow, nor will it add files to your project. It's not a macro/ppx/generator either.
+`pyaco validate` will not force you to change your workflow, nor will it add files to your project. It's not a macro/ppx/generator either.
 
 Put simply, it's a super powerful grep, that will read all the files you want to validate, check for the css class names, and exit. Since it's extremely fast (less than 2 seconds to analyze more than 5000 files that all contained more than 600 lines of code on my pretty old machine, not even half a second on ~500 files projects), it can integrate easily with your favorit CI tool.
 
