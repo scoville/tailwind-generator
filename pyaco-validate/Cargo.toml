@@ -5,9 +5,9 @@ name = "pyaco-validate"
 version = "0.1.0"
 
 [dependencies]
-anyhow = "1.0.42"
-clap = "3.0.0-beta.2"
-futures = {version = "0.3.16", default-features = false, features = ["alloc"]}
+anyhow = "1.0.43"
+clap = "3.0.0-beta.4"
+futures = { version = "0.3.17", default-features = false, features = ["alloc"] }
 glob = "0.3.0"
 grep-matcher = "0.1.5"
 grep-regex = "0.1.9"
@@ -15,4 +15,4 @@ grep-searcher = "0.1.8"
 log = "0.4.14"
 pyaco-core = {path = "../pyaco-core"}
 regex = "1.5.4"
-tokio = {version = "1.9.0", features = ["full"]}
+tokio = { version = "1.11.0", features = ["full"] }
