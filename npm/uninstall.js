@@ -1,13 +1,14 @@
-function getBinary() {
-  try {
-    const getBinary = require("./getBinary");
+try {
+  const { getBinary, getPlatform } = require("./getBinary");
 
-    return getBinary();
-  } catch {}
-}
+  const platform = getPlatform();
 
-const binary = getBinary();
+  if (platform) {
+    // Supported platform, use an actual binary
+    const binary = getBinary(platform);
 
-if (binary) {
-  binary.uninstall();
+    binary.uninstall();
+  }
+} catch {
+  // Not already installed, does nothing
 }

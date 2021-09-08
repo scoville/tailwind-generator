@@ -1,7 +1,10 @@
+**/.DS_Store
 /.vscode
 /builds
+/releases
 /node_modules
 /target
 *.css
-yarn-error.log
 *.tar.gz
+/npm-debug.log*
+/yarn-error.log
