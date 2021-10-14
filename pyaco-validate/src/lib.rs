@@ -90,7 +90,7 @@ pub async fn run(options: Options) -> Result<()> {
         .collect::<HashSet<&String>>();
 
     info!(
-        "{} classes used in total throughout the project, {} classes are whitelisted",
+        "{} classes used in total in the provided files, {} whitelisted classes",
         found_classes.len(),
         accepted_classes.len()
     );
