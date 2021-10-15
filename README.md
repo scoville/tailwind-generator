@@ -1,7 +1,5 @@
 ## Pyaco (Polyglot tYpe sAfe Css tOolbox)
 
-_For the old version of this application, please see [here](https://github.com/scoville/tailwind-generator/tree/master)._
-
 This repository provides the `pyaco` binary, a Node.js libary, and a Rust crate to help you deal with css stylesheet in a type safe way.
 
 ### Pyaco generate: a type safe CSS to "\*" code generator, tailored for Tailwind
