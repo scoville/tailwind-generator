@@ -14,9 +14,9 @@ lazy_static = "1.4.0"
 pyaco-core = {path = "../pyaco-core"}
 pyaco-generate = {path = "../pyaco-generate"}
 pyaco-validate = {path = "../pyaco-validate"}
-tokio = {version = "1.11.0", features = ["full"]}
+tokio = { version = "1.12.0", features = ["full"] }
 
 [dependencies.neon]
 default-features = false
 features = ["napi-6"]
-version = "0.9"
+version = "0.9.1"
