@@ -13,36 +13,42 @@ lazy_static! {
         .unwrap();
 }
 
-macro_rules! get {
-    ($cx:ident, $options:ident, $name:expr, $type:ty) => {
-        $options
+macro_rules! get_attribute {
+    ($cx:ident[$index:literal][$name:literal] as $type:ty) => {
+        $cx.argument::<JsObject>($index)?
             .get(&mut $cx, $name)?
             .downcast_or_throw::<$type, _>(&mut $cx)?
             .value(&mut $cx);
     };
 
-    ($cx:ident, $options:ident, $name:expr) => {
-        get!($cx, $options, $name, JsString);
+    ($cx:ident[$index:literal][$name:literal]) => {
+        get_attribute!($cx[$index][$name] as JsString);
+    };
+
+    ($cx:ident[$name:literal]) => {
+        get_attribute!($cx[0][$name] as JsString);
+    };
+
+    ($cx:ident[$name:literal] as $type:ty) => {
+        get_attribute!($cx[0][$name] as $type);
     };
 }
 
 fn generate(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let options = cx.argument::<JsObject>(0)?;
+    let input = get_attribute!(cx["input"]);
 
-    let input = get!(cx, options, "input");
-
-    let lang = get!(cx, options, "lang");
+    let lang = get_attribute!(cx["lang"]);
 
     let lang = match lang.parse() {
         Err(_) => return cx.throw_error("Invalid lang"),
         Ok(lang) => lang,
     };
 
-    let output_directory = get!(cx, options, "outputDirectory");
+    let output_directory = get_attribute!(cx["outputDirectory"]);
 
-    let output_filename = get!(cx, options, "outputFilename");
+    let output_filename = get_attribute!(cx["outputFilename"]);
 
-    let watch = get!(cx, options, "watch", JsBoolean);
+    let watch = get_attribute!(cx["watch"] as JsBoolean);
 
     let options = GenerateOptions {
         input,
@@ -59,22 +65,20 @@ fn generate(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 }
 
 fn validate(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let options = cx.argument::<JsObject>(0)?;
-
     let cb = cx.argument::<JsFunction>(1)?;
 
-    let capture_regex = get!(cx, options, "captureRegex");
+    let capture_regex = get_attribute!(cx["captureRegex"]);
 
-    let css_input = get!(cx, options, "cssInput");
+    let css_input = get_attribute!(cx["cssInput"]);
 
-    let input_glob = get!(cx, options, "inputGlob");
+    let input_glob = get_attribute!(cx["inputGlob"]);
 
     // The following will not panic, but the result is not reliable and might
     // change depending on the platform (32/64 bits).
     // Since we don't expect big numbers to be provided it should work fine though.
-    let max_opened_files = get!(cx, options, "maxOpenedFiles", JsNumber) as usize;
+    let max_opened_files = get_attribute!(cx["maxOpenedFiles"] as JsNumber) as usize;
 
-    let split_regex = get!(cx, options, "splitRegex");
+    let split_regex = get_attribute!(cx["splitRegex"]);
 
     let options = ValidateOptions {
         capture_regex,
