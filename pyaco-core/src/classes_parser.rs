@@ -9,8 +9,8 @@ use cssparser::{
 pub struct ClassesParser;
 
 impl<'i> QualifiedRuleParser<'i> for ClassesParser {
-    type Prelude = HashSet<String>;
-    type QualifiedRule = HashSet<String>;
+    type Prelude = Option<HashSet<String>>;
+    type QualifiedRule = Option<HashSet<String>>;
     type Error = ();
 
     fn parse_prelude<'t>(
@@ -26,22 +26,24 @@ impl<'i> QualifiedRuleParser<'i> for ClassesParser {
                     if let Ok(Token::Ident(ident)) = input.next() {
                         ret.insert(ident.to_string());
                     } else {
+                        // TODO: We should provide a better error here and let the developer know
+                        // that the css is probably ill-formatted.
                         return Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid));
                     }
                 }
                 // Match any other token and ignore
                 Ok(_) => continue,
-                // Match end of input, break and return found classes
+                // Match end of input, break and return found classes if any
                 Err(BasicParseError {
                     kind: BasicParseErrorKind::EndOfInput,
                     ..
                 }) => break,
-                // Match any other error, break now and return an error
-                Err(_) => return Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid)),
+                // Match any other error and return it
+                Err(error) => return Err(error.into()),
             }
         }
 
-        Ok(ret)
+        Ok(Some(ret))
     }
 
     fn parse_block<'t>(
@@ -61,8 +63,9 @@ impl<'i> QualifiedRuleParser<'i> for ClassesParser {
 
 impl<'i> AtRuleParser<'i> for ClassesParser {
     type PreludeNoBlock = ();
-    type PreludeBlock = ();
-    type AtRule = HashSet<String>;
+    // `true` if the @rule body should be parsed, `false` otherwise
+    type PreludeBlock = bool;
+    type AtRule = Option<HashSet<String>>;
     type Error = ();
 
     #[allow(clippy::type_complexity)]
@@ -73,8 +76,17 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
     ) -> Result<AtRuleType<Self::PreludeNoBlock, Self::PreludeBlock>, ParseError<'i, Self::Error>>
     {
         let ret = match name.as_ref() {
-            "media" => Ok(AtRuleType::WithBlock(())),
-            _ => Ok(AtRuleType::WithoutBlock(())),
+            // See https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule for more
+            // "media" is the only @rule we'll parse the body in the `parse_block` function.
+            "media" => AtRuleType::WithBlock(true),
+            "supports"
+            | "page"
+            | "font-face"
+            | "keyframes"
+            | "-webkit-keyframes"
+            | "counter-style"
+            | "font-feature-values" => AtRuleType::WithBlock(false),
+            _ => AtRuleType::WithoutBlock(()),
         };
 
         // Consume the rest of the input
@@ -82,15 +94,25 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
             continue;
         }
 
-        ret
+        Ok(ret)
     }
 
     fn parse_block<'t>(
         &mut self,
-        mut _prelude: Self::PreludeBlock,
+        prelude: Self::PreludeBlock,
         _start: &ParserState,
         input: &mut Parser<'i, 't>,
     ) -> Result<Self::AtRule, ParseError<'i, ()>> {
+        // The @rule should not be parsed any further
+        if !prelude {
+            // Consume the input
+            while input.next().is_ok() {
+                continue;
+            }
+
+            return Ok(None);
+        }
+
         let mut ret = HashSet::new();
 
         loop {
@@ -100,21 +122,32 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
                     if let Ok(Token::Ident(ident)) = input.next() {
                         ret.insert(ident.to_string());
                     } else {
-                        return Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid));
+                        return Err(input.new_error(BasicParseErrorKind::AtRuleBodyInvalid));
                     }
                 }
                 // Match any other token and ignore
                 Ok(_) => continue,
-                // Match end of input, break and return found classes
+                // Match end of input, break and return found classes if any
                 Err(BasicParseError {
                     kind: BasicParseErrorKind::EndOfInput,
                     ..
                 }) => break,
-                // Match any other error, break now and return an error
-                Err(_) => return Err(input.new_error(BasicParseErrorKind::QualifiedRuleInvalid)),
+                // Match any other error and return it
+                Err(error) => return Err(error.into()),
             }
         }
 
-        Ok(ret)
+        Ok(Some(ret))
+    }
+
+    // Simply ignores @rules without blocks, the implementation of this function
+    // is required by the `cssparser` crate if a `AtRuleType::WithoutBlock` value
+    // is returned at runtime by the `parse_prelude` function.
+    fn rule_without_block(
+        &mut self,
+        _prelude: Self::PreludeNoBlock,
+        _start: &ParserState,
+    ) -> Self::AtRule {
+        None
     }
 }

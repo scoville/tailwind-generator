@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 use cssparser::{Parser, ParserInput, RuleListParser};
-use log::info;
+use log::{error, info};
 use std::collections::HashSet;
 use std::ffi::OsStr;
 use std::io::Read;
@@ -70,11 +70,18 @@ where
 
     let rule_list_parser = RuleListParser::new_for_stylesheet(&mut parser, ClassesParser);
 
-    let out_classes = rule_list_parser
-        .into_iter()
-        .flatten()
-        .flatten()
-        .collect::<HashSet<String>>();
+    let out_classes =
+        rule_list_parser
+            .into_iter()
+            .fold(HashSet::new(), |mut classes, classes_results| {
+                match classes_results {
+                    Ok(None) => (),
+                    Ok(Some(new_classes)) => classes.extend(new_classes),
+                    Err(error) => error!("An error occured while parsing the css: {:?}", error),
+                };
+
+                classes
+            });
 
     if out_classes.is_empty() {
         return Err(anyhow!("no css classes found, are you sure the provided css source contains at least one class and is valid?"));
