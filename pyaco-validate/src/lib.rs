@@ -1,17 +1,22 @@
 use anyhow::Result;
-use clap::Clap;
+use clap::Parser as ClapParser;
 use futures::{stream, StreamExt};
 use glob::glob;
 use grep_matcher::{Captures, Matcher};
 use grep_regex::RegexMatcher;
 use grep_searcher::{sinks::UTF8, SearcherBuilder};
 use log::{error, info};
+use notify::{watcher, DebouncedEvent, RecursiveMode, Watcher};
 use pyaco_core::InputType;
 use regex::Regex;
+use std::convert::TryInto;
+use std::error::Error;
+use std::sync::mpsc::channel;
+use std::time::Duration;
 use std::{borrow::Borrow, collections::HashSet, fs::File, path::Path, process::exit, sync::Arc};
 use tokio::sync::Mutex;
 
-#[derive(Clap, Debug)]
+#[derive(ClapParser, Debug)]
 pub struct Options {
     /// CSS file path or URL used for code verification
     #[clap(short, long)]
@@ -32,6 +37,14 @@ pub struct Options {
     /// How many files can be read concurrently at most, setting this value to a big number might break depending on your system
     #[clap(long, default_value = "128")]
     pub max_opened_files: usize,
+
+    /// Watch for changes in the provided css file and files and revalidate the code (doesn't work with URL)
+    #[clap(short, long)]
+    pub watch: bool,
+
+    /// Watch debounce duration (in ms), if files are validated twice after saving a file, you should try to increase this value
+    #[clap(long, default_value = "10")]
+    pub watch_debounce_duration: u64,
 }
 
 pub async fn run(options: Options) -> Result<()> {
@@ -44,15 +57,70 @@ pub async fn run(options: Options) -> Result<()> {
         options.input_glob, options.css_input
     );
 
-    let css_input = InputType::from_path(options.css_input);
+    let css_input = options.css_input.as_str().try_into()?;
 
+    let glob_pattern = glob::Pattern::new(options.input_glob.as_str())?;
+
+    let paths = glob(glob_pattern.as_str())?;
+
+    run_once(
+        paths,
+        &css_input,
+        capture_regex.clone(),
+        split_regex.clone(),
+        options.max_opened_files,
+    )
+    .await?;
+
+    if options.watch {
+        let (tx, rx) = channel();
+
+        let mut watcher = watcher(tx, Duration::from_millis(options.watch_debounce_duration))?;
+
+        if let InputType::Path(ref css_input_path) = css_input {
+            watcher.watch(css_input_path, RecursiveMode::NonRecursive)?;
+        }
+
+        for filepath in (glob(glob_pattern.as_str())?).flatten() {
+            watcher.watch(filepath.as_path(), RecursiveMode::NonRecursive)?;
+        }
+
+        loop {
+            if let Ok(DebouncedEvent::Write(_)) = rx.recv() {
+                let paths = glob(glob_pattern.as_str())?;
+
+                run_once(
+                    paths,
+                    &css_input,
+                    capture_regex.clone(),
+                    split_regex.clone(),
+                    options.max_opened_files,
+                )
+                .await?;
+            }
+        }
+    }
+
+    Ok(())
+}
+
+async fn run_once<I, P, E>(
+    paths: I,
+    css_input: &InputType,
+    capture_regex: Arc<RegexMatcher>,
+    split_regex: Arc<Regex>,
+    max_opened_files: usize,
+) -> Result<()>
+where
+    P: AsRef<Path>,
+    E: Error,
+    I: IntoIterator<Item = Result<P, E>>,
+{
     // The classes contained in the provided css file/URL
     let accepted_classes = css_input.extract_classes()?;
 
-    let glob = glob(options.input_glob.as_str())?;
-
     // Open and extract classes from files concurrently
-    let jobs = stream::iter(glob)
+    let jobs = stream::iter(paths)
         .filter_map(|path| async move {
             match path {
                 Ok(path) => open_file(path).await,
@@ -60,13 +128,13 @@ pub async fn run(options: Options) -> Result<()> {
             }
         })
         .map(|file| {
-            let split_regex = split_regex.clone();
-
-            let capture_regex = capture_regex.clone();
-
-            tokio::spawn(extra_classes_from_path(file, capture_regex, split_regex))
+            tokio::spawn(extra_classes_from_path(
+                file,
+                capture_regex.clone(),
+                split_regex.clone(),
+            ))
         })
-        .buffer_unordered(options.max_opened_files);
+        .buffer_unordered(max_opened_files);
 
     let found_classes = Mutex::new(HashSet::new());
 
@@ -95,15 +163,13 @@ pub async fn run(options: Options) -> Result<()> {
         accepted_classes.len()
     );
 
-    if !unknown_classes.is_empty() {
-        for class in unknown_classes {
-            eprintln!("Unknown class found {}", class);
+    if unknown_classes.is_empty() {
+        println!("Used classes are all valid");
+    } else {
+        for unknown_class in unknown_classes {
+            println!("Unknown class found {}", unknown_class);
         }
-
-        exit(1);
     }
-
-    info!("Used classes are all valid");
 
     Ok(())
 }
