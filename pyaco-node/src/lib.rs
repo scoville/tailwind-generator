@@ -50,12 +50,16 @@ fn generate(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 
     let watch = get_attribute!(cx["watch"] as JsBoolean);
 
+    // Unsafe conversion, invalid values will automatically be converted to `0`.
+    let watch_debounce_duration = get_attribute!(cx["watchDebounceDuration"] as JsNumber) as u64;
+
     let options = GenerateOptions {
         input,
         lang,
         output_directory,
         output_filename,
         watch,
+        watch_debounce_duration,
     };
 
     match run_generate(options) {
@@ -80,12 +84,19 @@ fn validate(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 
     let split_regex = get_attribute!(cx["splitRegex"]);
 
+    let watch = get_attribute!(cx["watch"] as JsBoolean);
+
+    // Unsafe conversion, invalid values will automatically be converted to `0`.
+    let watch_debounce_duration = get_attribute!(cx["watchDebounceDuration"] as JsNumber) as u64;
+
     let options = ValidateOptions {
         capture_regex,
         css_input,
         input_glob,
         max_opened_files,
         split_regex,
+        watch,
+        watch_debounce_duration,
     };
 
     let ret = cx.undefined();

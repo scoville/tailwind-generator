@@ -32,6 +32,13 @@ yargs(hideBin(process.argv))
             "Watch for changes in the provided css file and regenarate the code (doesn't work with URL)",
           default: false,
         })
+        .option("watch-debounce-duration", {
+          alias: "w",
+          type: "number",
+          describe:
+            "Watch debounce duration (in ms), if files are validated twice after saving the css file, you should try to increase this value",
+          default: 10,
+        });
         .option("output-directory", {
           alias: "o",
           describe: "Directory for generated code",
@@ -44,6 +51,7 @@ yargs(hideBin(process.argv))
         lang: argv.lang,
         outputDirectory: argv["output-directory"],
         watch: argv.watch,
+        watchDebounceDuration: argv["watch-debounce-duration"],
         outputFilename: argv["output-filename"],
       })
   )
@@ -75,6 +83,20 @@ yargs(hideBin(process.argv))
           describe:
             "Classes splitter regex, will split the string captured with the `capture_regex` argument and split it into classes",
           default: "\\s+",
+        })
+        .option("watch", {
+          alias: "w",
+          type: "boolean",
+          describe:
+            "Watch for changes in the provided css file and files and regenarate the code (doesn't work with URL)",
+          default: false,
+        })
+        .option("watch-debounce-duration", {
+          alias: "w",
+          type: "number",
+          describe:
+            "Watch debounce duration (in ms), if files are validated twice after saving a file, you should try to increase this value",
+          default: 10,
         });
     },
     (argv) =>
@@ -85,6 +107,8 @@ yargs(hideBin(process.argv))
           captureRegex: argv["capture-regex"],
           maxOpenedFiles: argv["max-opened-files"],
           splitRegex: argv["split-regex"],
+          watch: argv["watch"],
+          watchDebounceDuration: argv["watch-debounce-duration"],
         },
         () => {}
       )

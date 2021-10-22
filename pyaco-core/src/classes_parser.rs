@@ -73,18 +73,13 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
         name: CowRcStr<'i>,
         input: &mut Parser<'i, 't>,
     ) -> Result<Self::Prelude, ParseError<'i, Self::Error>> {
-        let ret = match name.as_ref() {
-            // "media" is the only @rule we'll parse the body in the `parse_block` function.
-            "media" => true,
-            _ => false,
-        };
-
         // Consume the rest of the input
         while input.next().is_ok() {
             continue;
         }
 
-        Ok(ret)
+        // "media" is the only @rule we'll parse the body in the `parse_block` function.
+        Ok(matches!(name.as_ref(), "media"))
     }
 
     fn parse_block<'t>(

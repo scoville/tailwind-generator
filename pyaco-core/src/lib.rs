@@ -1,7 +1,8 @@
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Error, Result};
 use cssparser::{Parser, ParserInput, RuleListParser};
 use log::{error, info};
 use std::collections::HashSet;
+use std::convert::TryFrom;
 use std::ffi::OsStr;
 use std::io::Read;
 use std::path::PathBuf;
@@ -23,17 +24,25 @@ pub enum InputType {
 }
 
 impl InputType {
-    pub fn from_path<S: AsRef<str>>(input: S) -> Self {
-        match Url::parse(input.as_ref()) {
-            Err(_) => InputType::Path(PathBuf::from(input.as_ref())),
-            Ok(url) => InputType::Url(url),
-        }
-    }
-
     pub fn extract_classes(&self) -> Result<HashSet<String>> {
         match self {
             Self::Path(path) => extract_classes_from_file(path),
             Self::Url(url) => extract_classes_from_url(url),
+        }
+    }
+}
+
+impl TryFrom<&str> for InputType {
+    type Error = Error;
+
+    fn try_from(value: &str) -> Result<Self> {
+        match Url::parse(value) {
+            Err(_) => {
+                let filepath = std::fs::canonicalize(value)?;
+
+                Ok(InputType::Path(filepath))
+            }
+            Ok(url) => Ok(InputType::Url(url)),
         }
     }
 }

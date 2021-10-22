@@ -1,16 +1,16 @@
 use anyhow::Result;
-use clap::{crate_version, Clap};
+use clap::{crate_version, Parser as ClapParser};
 use pyaco_generate::{run as generate, Options as GenerateOptions};
 use pyaco_validate::{run as validate, Options as ValidateOptions};
 
-#[derive(Clap, Debug)]
+#[derive(ClapParser, Debug)]
 #[clap(name = "pyaco", version = crate_version!())]
 pub struct Options {
     #[clap(subcommand)]
     pub command: Command,
 }
 
-#[derive(Clap, Debug)]
+#[derive(ClapParser, Debug)]
 pub enum Command {
     /// Generate code from a css input
     Generate(GenerateOptions),

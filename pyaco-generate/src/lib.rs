@@ -1,19 +1,20 @@
 use anyhow::Result;
-use clap::Clap;
-use log::{debug, info, log_enabled, warn, Level};
-use notify::event::{DataChange, ModifyKind};
-use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
+use clap::Parser as ClapParser;
+use log::{info, log_enabled, warn, Level};
+use notify::{watcher, DebouncedEvent, RecursiveMode, Watcher};
 use pyaco_core::{
     resolve_path, ElmTemplate, InputType, Lang, LangTemplate, PurescriptTemplate, RescriptTemplate,
     RescriptTypeTemplate, RescriptiTemplate, TypescriptTemplate, TypescriptType1Template,
     TypescriptType2Template,
 };
+use std::convert::TryInto;
 use std::fs::create_dir_all;
 use std::path::Path;
 use std::process;
 use std::sync::mpsc::channel;
+use std::time::Duration;
 
-#[derive(Clap, Debug)]
+#[derive(ClapParser, Debug)]
 pub struct Options {
     /// CSS file path and/or URL to parse and generate code from
     #[clap(short, long)]
@@ -34,10 +35,14 @@ pub struct Options {
     /// Watch for changes in the provided css file and regenarate the code (doesn't work with URL)
     #[clap(short, long)]
     pub watch: bool,
+
+    /// Watch debounce duration (in ms), if files are validated twice after saving the css file, you should try to increase this value
+    #[clap(long, default_value = "10")]
+    pub watch_debounce_duration: u64,
 }
 
 pub fn run(options: Options) -> Result<()> {
-    let input = InputType::from_path(options.input);
+    let input = options.input.as_str().try_into()?;
 
     if log_enabled!(Level::Info) || log_enabled!(Level::Warn) {
         match input {
@@ -71,6 +76,7 @@ pub fn run(options: Options) -> Result<()> {
                 &options.lang,
                 options.output_directory.as_str(),
                 options.output_filename.as_str(),
+                options.watch_debounce_duration,
             )?
         }
     }
@@ -138,41 +144,28 @@ fn run_watch(
     lang: &Lang,
     output_directory: &str,
     output_filename: &str,
+    watch_debounce_duration: u64,
 ) -> Result<()> {
     let (tx, rx) = channel();
 
-    let mut watcher = RecommendedWatcher::new(move |result| {
-        if tx.send(result).is_err() {
-            debug!("Couldn't send event message to watcher")
-        }
-    })?;
+    let mut watcher = watcher(tx, Duration::from_millis(watch_debounce_duration))?;
 
     watcher.watch(path, RecursiveMode::NonRecursive)?;
 
-    for result in rx {
-        match result {
-            Ok(Event {
-                kind: EventKind::Modify(ModifyKind::Data(DataChange::Content)),
-                ..
-            }) => run_once(
+    loop {
+        match rx.recv() {
+            Ok(DebouncedEvent::Write(_)) => run_once(
                 &InputType::Path(path.to_owned()),
                 lang,
                 output_directory,
                 output_filename,
             )?,
-            Ok(Event {
-                kind: EventKind::Modify(ModifyKind::Name(notify::event::RenameMode::From)),
-                ..
-            }) => {
+            Ok(DebouncedEvent::Remove(_)) => {
                 warn!("File {:?} was removed, exiting", path);
+
                 process::exit(2)
             }
-            Ok(Event {
-                kind: event_kind, ..
-            }) => debug!("Unhandled event kind: {:?}", event_kind),
-            Err(error) => warn!("Watch error: {}", error),
+            Ok(_) | Err(_) => (),
         }
     }
-
-    Ok(())
 }

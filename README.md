@@ -42,29 +42,39 @@ pyaco generate --help
 
 ```
 pyaco-generate
+
 Generate code from a css input
 
 USAGE:
-    pyaco generate [FLAGS] [OPTIONS] --input <input> --output-filename <output-filename> --lang <lang>
-
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
-    -w, --watch      Watch for changes in the provided css file and regenarate the code (doesn't
-                     work with URL)
+    pyaco generate [OPTIONS] --input <INPUT> --output-filename <OUTPUT_FILENAME> --lang <LANG>
 
 OPTIONS:
-    -i, --input <input>
+    -f, --output-filename <OUTPUT_FILENAME>
+            Filename (without extension) used for the generated code
+
+    -h, --help
+            Print help information
+
+    -i, --input <INPUT>
             CSS file path and/or URL to parse and generate code from
 
-    -l, --lang <lang>
+    -l, --lang <LANG>
             Language used in generated code (elm|purescript|rescript|typescript|typescript-type-
             1|typescript-type-2)
 
-    -o, --output-directory <output-directory>    Directory for generated code [default: ./]
-    -f, --output-filename <output-filename>
-            Filename (without extension) used for the generated code
+    -o, --output-directory <OUTPUT_DIRECTORY>
+            Directory for generated code [default: ./]
+
+    -w, --watch
+            Watch for changes in the provided css file and regenarate the code (doesn't work with
+            URL)
+
+        --watch-debounce-duration <WATCH_DEBOUNCE_DURATION>
+            Watch debounce duration (in ms), if files are validated twice after saving the css file,
+            you should try to increase this value [default: 10]
 ```
+
+_Warning: the `-w|--watch` mode is still experimental and might contain some bugs, use with care._
 
 `pyaco generate` uses [env_logger](https://docs.rs/env_logger/0.8.4/env_logger/) under the hood, so you can prefix your command with `RUST_LOG=info` for a more verbose output, the binary is silent by default.
 
@@ -123,8 +133,6 @@ RUST_LOG=info pyaco generate \
   -l purescript \
   -f Css
 ```
-
-_Warning: the `-w|--watch` mode is still experimental and might contain some bugs (for instance the file is sometimes generated twice), use with care._
 
 ### Generators
 
@@ -360,6 +368,53 @@ Put simply, it's a specialized `grep` that will read all the files you want to v
 
 _This binary is still experimental as we need to test it out more on larger codebase in TypeScript first, also some much needed quality of life improvements are still being worked on (watch mode, whitelist, configuration file, etc...)._
 
+To get help:
+
+```bash
+pyaco validate --help
+```
+
+```
+pyaco-validate
+
+Validate code against a css input
+
+USAGE:
+    pyaco validate [OPTIONS] --css-input <CSS_INPUT> --input-glob <INPUT_GLOB>
+
+OPTIONS:
+    -c, --css-input <CSS_INPUT>
+            CSS file path or URL used for code verification
+
+        --capture-regex <CAPTURE_REGEX>
+            Classes matcher regex, must include a capture containing all the classes [default:
+            class="([^"]+)"]
+
+    -h, --help
+            Print help information
+
+    -i, --input-glob <INPUT_GLOB>
+            Glob pointing to the files to validate
+
+        --max-opened-files <MAX_OPENED_FILES>
+            How many files can be read concurrently at most, setting this value to a big number
+            might break depending on your system [default: 128]
+
+        --split-regex <SPLIT_REGEX>
+            Classes splitter regex, will split the string captured with the `capture_regex` argument
+            and split it into classes [default: \s+]
+
+    -w, --watch
+            Watch for changes in the provided css file and files and revalidate the code (doesn't
+            work with URL)
+
+        --watch-debounce-duration <WATCH_DEBOUNCE_DURATION>
+            Watch debounce duration (in ms), if files are validated twice after saving a file, you
+            should try to increase this value [default: 10]
+```
+
+_Warning: the `-w|--watch` mode is still experimental and might contain some bugs, use with care._
+
 ### The Node.js API
 
 _The API is very likely to change soon, please use with care._
@@ -369,25 +424,24 @@ When installed with `npm` or `yarn` you can execute the provided cli or alternat
 ```js
 import { generate, validate } from "pyaco";
 
-pyaco.generate({
+generate({
   input: "...",
   lang: "purescript",
   outputDirectory: "...",
   watch: false,
+  watchDebounceDuration: 0,
   outputFilename: "...",
 });
 
-pyaco.validate(
-  {
-    cssInput: "...",
-    inputGlob: "...",
-    captureRegex: "...",
-    maxOpenedFiles: 128,
-    splitRegex: "...",
-  },
-  // The callback is required
-  () => {
-    console.log("All done");
-  }
-);
+validate({
+  cssInput: "...",
+  inputGlob: "...",
+  captureRegex: "...",
+  maxOpenedFiles: 128,
+  splitRegex: "...",
+  watch: false,
+  watchDebounceDuration: 0,
+}).then(() => {
+  console.log("Done");
+});
 ```
