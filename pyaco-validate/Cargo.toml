@@ -14,5 +14,5 @@ grep-regex = "0.1.9"
 grep-searcher = "0.1.8"
 log = "0.4.14"
 pyaco-core = {path = "../pyaco-core"}
-regex = "1.5.4"
+regex = "1.5.5"
 tokio = { version = "1.13.1", features = ["full"] }
