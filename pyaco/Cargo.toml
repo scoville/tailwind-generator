@@ -10,4 +10,4 @@ clap = "3.0.0-beta.4"
 env_logger = "0.9.0"
 pyaco-generate = {path = "../pyaco-generate"}
 pyaco-validate = {path = "../pyaco-validate"}
-tokio = {version = "1.13.1", features = ["full"]}
+tokio = {version = "1.18.4", features = ["full"]}
