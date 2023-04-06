@@ -1,22 +1,20 @@
 [package]
-authors = ["Kévin COMBRIAT <kevin@sc0ville.com>"]
-edition = "2018"
-license = "ISC"
 name = "pyaco-node"
 version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-env_logger = "0.9.0"
-lazy_static = "1.4.0"
-pyaco-core = {path = "../pyaco-core"}
-pyaco-generate = {path = "../pyaco-generate"}
-pyaco-validate = {path = "../pyaco-validate"}
-tokio = { version = "1.12.0", features = ["full"] }
+napi.workspace = true
+napi-derive.workspace = true
+pyaco-generate.workspace = true
+pyaco-validate.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
 
-[dependencies.neon]
-default-features = false
-features = ["napi-6"]
-version = "0.9.1"
+[build-dependencies]
+napi-build = "2.0.1"

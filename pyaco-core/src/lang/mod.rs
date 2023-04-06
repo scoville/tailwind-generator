@@ -1,23 +1,25 @@
-use anyhow::Result;
-use askama::Template;
-use log::info;
-use std::borrow::Cow;
-use std::collections::HashSet;
-use std::fmt::Display;
-use std::fs::File;
-use std::io::Write;
-use std::path::Component;
-use std::path::Path;
-use std::str::FromStr;
+use std::{
+    borrow::Cow, collections::HashSet, fmt::Display, path::Component, path::Path, str::FromStr,
+};
 
-pub use super::elm::ElmTemplate;
-pub use super::purescript::PurescriptTemplate;
-pub use super::rescript::RescriptTemplate;
-pub use super::rescript::RescriptiTemplate;
-pub use super::rescript_type::RescriptTypeTemplate;
-pub use super::typescript::TypescriptTemplate;
-pub use super::typescript_type_1::TypescriptType1Template;
-pub use super::typescript_type_2::TypescriptType2Template;
+use askama::Template;
+use async_trait::async_trait;
+use compact_str::CompactString;
+use serde::Deserialize;
+use tokio::fs::File;
+use tokio::io::AsyncWriteExt;
+use tracing::info;
+
+use crate::Result;
+
+pub use super::elm::Elm;
+pub use super::purescript::Purescript;
+pub use super::rescript::Rescript;
+pub use super::rescript::Rescripti;
+pub use super::rescript_type::RescriptType;
+pub use super::typescript::Typescript;
+pub use super::typescript_type_1::TypescriptType1;
+pub use super::typescript_type_2::TypescriptType2;
 
 pub mod elm;
 pub mod purescript;
@@ -27,7 +29,8 @@ pub mod typescript;
 pub mod typescript_type_1;
 pub mod typescript_type_2;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(rename_all = "kebab-case")]
 pub enum Lang {
     Elm,
     Purescript,
@@ -51,31 +54,32 @@ impl FromStr for Lang {
             "typescript-type-1" => Ok(Lang::TypescriptType1),
             "typescript-type-2" => Ok(Lang::TypescriptType2),
             unknown_lang => Err(format!(
-                "\"{}\" is not a valid lang, should be one of (elm|purescript|rescript|rescript-type|typescript|typescript-type-1|typescript-type-2)",
-                unknown_lang
+                "\"{unknown_lang}\" is not a valid lang, should be one of (elm|purescript|rescript|rescript-type|typescript|typescript-type-1|typescript-type-2)"
             )),
         }
     }
 }
 
+#[async_trait]
+#[allow(clippy::module_name_repetitions)]
 pub trait LangTemplate<'a>: Template + Sized {
+    /// ## Errors
+    ///
+    /// A template creation typically fails when the directory/filenames are not present or can't be accessed
     fn new(
         output_directory: &'a str,
         output_filename: &'a str,
-        classes: &'a HashSet<String>,
+        classes: &'a HashSet<CompactString>,
     ) -> Result<Self>;
 
-    fn write_to_file<P>(&self, path: P) -> Result<()>
-    where
-        P: AsRef<Path> + Display,
-    {
+    async fn write_to_file(&self, path: impl AsRef<Path> + Display + Send) -> Result<()> {
         info!("Writing code into {}", path);
 
         let code = self.render()?;
 
-        let mut output = File::create(path)?;
+        let mut output = File::create(path).await?;
 
-        output.write_all(code.as_bytes())?;
+        output.write_all(code.as_bytes()).await?;
 
         Ok(())
     }
@@ -88,9 +92,9 @@ pub(crate) fn generate_module_name<'a>(
 ) -> Result<Cow<'a, str>> {
     let path = Path::new(output_directory);
 
-    let base = path.components().into_iter().try_fold(
-        "".into(),
-        |acc, component| -> Result<Cow<'a, str>> {
+    let base = path
+        .components()
+        .try_fold("".into(), |acc, component| -> Result<Cow<'a, str>> {
             if let Component::Normal(part) = component {
                 let part = part.to_string_lossy();
 
@@ -98,16 +102,15 @@ pub(crate) fn generate_module_name<'a>(
                     return Ok(part);
                 }
 
-                return Ok(format!("{}.{}", acc, part).into());
+                return Ok(format!("{acc}.{part}").into());
             }
 
             Ok(acc)
-        },
-    )?;
+        })?;
 
     if base.is_empty() {
         return Ok(output_filename.into());
     }
 
-    Ok(format!("{}.{}", base, output_filename).into())
+    Ok(format!("{base}.{output_filename}").into())
 }

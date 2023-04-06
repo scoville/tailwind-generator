@@ -1,18 +1,22 @@
 [package]
-authors = ["Kévin COMBRIAT <kevin@sc0ville.com>"]
-edition = "2018"
 name = "pyaco-macro"
 version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
 
 [lib]
 proc-macro = true
 
 [dependencies]
-anyhow = "1.0.44"
-lazy_static = "1.4.0"
-proc-macro-error = "1.0.4"
-pyaco-core = {path = "../pyaco-core"}
-quote = "1.0.10"
-serde = { version = "1.0.130", features = ["derive"] }
-syn = "1.0.80"
-toml = "0.5.8"
+anyhow.workspace = true
+compact_str.workspace = true
+once_cell.workspace = true
+proc-macro-error.workspace = true
+pyaco-core.workspace = true
+quote.workspace = true
+serde.workspace = true
+syn.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+toml.workspace = true

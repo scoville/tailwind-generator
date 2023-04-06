@@ -1,14 +1,20 @@
 [package]
-authors = ["Kévin COMBRIAT <kevin@sc0ville.com>"]
-edition = "2018"
 name = "pyaco-core"
 version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
 
 [dependencies]
-anyhow = "1.0.44"
-askama = "0.10.5"
-convert_case = "0.4.0"
-cssparser = "0.29.0"
-log = "0.4.14"
-ureq = "2.3.0"
-url = "2.2.2"
+askama.workspace = true
+async-trait.workspace = true
+compact_str.workspace = true
+convert_case.workspace = true
+cssparser.workspace = true
+dunce.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+ureq.workspace = true
+url.workspace = true

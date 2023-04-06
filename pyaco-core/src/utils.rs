@@ -13,7 +13,7 @@ macro_rules! replace_first_char {
 /// (a pointer to the provided class is returned otherwise).
 ///
 /// Performs "smart conversion" when possible (`/` to `_over_`, etc...),
-/// and returns a camel_cased string.
+/// and returns a camel cased string.
 pub fn escape_class_name(class: &str) -> Cow<'_, str> {
     let mut class_chars = class.chars();
 
@@ -44,8 +44,8 @@ pub fn escape_class_name(class: &str) -> Cow<'_, str> {
 
     class
         .replace(":-", "_neg_")
-        .replace("/", "_over_")
-        .replace(".", "_dot_")
+        .replace('/', "_over_")
+        .replace('.', "_dot_")
         .replace(
             &['!', ':', '~', '@', '#', '$', '^', '=', '*', '(', ')', ';'][..],
             "_",

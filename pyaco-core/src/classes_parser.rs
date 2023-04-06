@@ -1,30 +1,32 @@
 use std::collections::HashSet;
 
-use anyhow::Result;
+use compact_str::CompactString;
 use cssparser::{
     AtRuleParser, BasicParseError, BasicParseErrorKind, CowRcStr, ParseError, Parser, ParserState,
     QualifiedRuleParser, Token,
 };
 
+use crate::Result;
+
 pub struct ClassesParser;
 
 impl<'i> QualifiedRuleParser<'i> for ClassesParser {
-    type Prelude = Option<HashSet<String>>;
-    type QualifiedRule = Option<HashSet<String>>;
+    type Prelude = Option<HashSet<CompactString>>;
+    type QualifiedRule = Option<HashSet<CompactString>>;
     type Error = ();
 
     fn parse_prelude<'t>(
         &mut self,
         input: &mut Parser<'i, 't>,
     ) -> Result<Self::Prelude, ParseError<'i, Self::Error>> {
-        let mut ret = HashSet::new();
+        let mut classes = HashSet::new();
 
         loop {
             match input.next() {
                 // Match a new potential class
                 Ok(Token::Delim('.')) => {
                     if let Ok(Token::Ident(ident)) = input.next() {
-                        ret.insert(ident.to_string());
+                        classes.insert(ident.as_ref().into());
                     } else {
                         // TODO: We should provide a better error here and let the developer know
                         // that the css is probably ill-formatted.
@@ -43,7 +45,7 @@ impl<'i> QualifiedRuleParser<'i> for ClassesParser {
             }
         }
 
-        Ok(Some(ret))
+        Ok(Some(classes))
     }
 
     fn parse_block<'t>(
@@ -64,7 +66,7 @@ impl<'i> QualifiedRuleParser<'i> for ClassesParser {
 impl<'i> AtRuleParser<'i> for ClassesParser {
     // `true` if the @rule body should be parsed, `false` otherwise
     type Prelude = bool;
-    type AtRule = Option<HashSet<String>>;
+    type AtRule = Option<HashSet<CompactString>>;
     type Error = ();
 
     #[allow(clippy::type_complexity)]
@@ -105,7 +107,7 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
                 // Match a new potential class
                 Ok(Token::Delim('.')) => {
                     if let Ok(Token::Ident(ident)) = input.next() {
-                        ret.insert(ident.to_string());
+                        ret.insert(ident.as_ref().into());
                     } else {
                         return Err(input.new_error(BasicParseErrorKind::AtRuleBodyInvalid));
                     }

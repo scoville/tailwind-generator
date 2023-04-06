@@ -1,19 +1,26 @@
-use anyhow::{anyhow, Error, Result};
+#![deny(clippy::all)]
+#![deny(clippy::pedantic)]
+
+use std::{
+    collections::HashSet,
+    convert::TryFrom,
+    ffi::OsStr,
+    path::{Path, PathBuf},
+};
+
+use compact_str::CompactString;
 use cssparser::{Parser, ParserInput, RuleListParser};
-use log::{error, info};
-use std::collections::HashSet;
-use std::convert::TryFrom;
-use std::ffi::OsStr;
-use std::io::Read;
-use std::path::PathBuf;
-use std::{fs::File, path::Path};
+use tokio::{fs::File, io::AsyncReadExt};
+use tracing::{debug_span, error, info};
 use url::Url;
 
 use crate::classes_parser::ClassesParser;
 
-pub use lang::*;
+pub use crate::errors::*;
+pub use crate::lang::*;
 
 mod classes_parser;
+mod errors;
 mod lang;
 mod utils;
 
@@ -24,9 +31,12 @@ pub enum InputType {
 }
 
 impl InputType {
-    pub fn extract_classes(&self) -> Result<HashSet<String>> {
+    /// ## Errors
+    ///
+    /// See `extract_classes_from_file` and `extract_classes_from_file` for more
+    pub async fn extract_classes(&self) -> Result<HashSet<CompactString>> {
         match self {
-            Self::Path(path) => extract_classes_from_file(path),
+            Self::Path(path) => extract_classes_from_file(path).await,
             Self::Url(url) => extract_classes_from_url(url),
         }
     }
@@ -38,7 +48,7 @@ impl TryFrom<&str> for InputType {
     fn try_from(value: &str) -> Result<Self> {
         match Url::parse(value) {
             Err(_) => {
-                let filepath = std::fs::canonicalize(value)?;
+                let filepath = dunce::canonicalize(value)?;
 
                 Ok(InputType::Path(filepath))
             }
@@ -47,38 +57,37 @@ impl TryFrom<&str> for InputType {
     }
 }
 
-pub fn extract_classes_from_file<P>(path: P) -> Result<HashSet<String>>
-where
-    P: AsRef<Path>,
-{
-    let mut file = File::open(path)?;
+/// ## Errors
+///
+/// Fails if the file can't be read or if the css can't be parsed
+pub async fn extract_classes_from_file(path: impl AsRef<Path>) -> Result<HashSet<CompactString>> {
+    let mut file = File::open(path).await?;
 
     let mut file_content = String::new();
 
-    file.read_to_string(&mut file_content)?;
+    file.read_to_string(&mut file_content).await?;
 
     extract_classes_from_text(file_content)
 }
 
-pub fn extract_classes_from_url<U>(url: U) -> Result<HashSet<String>>
-where
-    U: AsRef<str>,
-{
-    let css_text = ureq::get(url.as_ref()).call()?.into_string()?;
+/// ## Errors
+///
+/// Fails if the request to the url fails or if the css can't be parsed
+pub fn extract_classes_from_url(url: impl AsRef<str>) -> Result<HashSet<CompactString>> {
+    let css_text = ureq::get(url.as_ref())
+        .call()
+        .map_err(Box::new)?
+        .into_string()?;
 
     extract_classes_from_text(css_text)
 }
 
-fn extract_classes_from_text<C>(css_text: C) -> Result<HashSet<String>>
-where
-    C: AsRef<str>,
-{
+fn extract_classes_from_text(css_text: impl AsRef<str>) -> Result<HashSet<CompactString>> {
+    debug_span!("extract_classes_from_text");
+
     let mut parser_input = ParserInput::new(css_text.as_ref());
-
     let mut parser = Parser::new(&mut parser_input);
-
     let rule_list_parser = RuleListParser::new_for_stylesheet(&mut parser, ClassesParser);
-
     let out_classes =
         rule_list_parser
             .into_iter()
@@ -93,7 +102,7 @@ where
             });
 
     if out_classes.is_empty() {
-        return Err(anyhow!("no css classes found, are you sure the provided css source contains at least one class and is valid?"));
+        return Err(Error::NoCssClassesFound);
     }
 
     info!("{} classes found", out_classes.len());
@@ -101,14 +110,14 @@ where
     Ok(out_classes)
 }
 
-pub fn resolve_path<D, P>(directory: D, filename: P, extension: &str) -> Result<String>
-where
-    D: AsRef<OsStr>,
-    P: AsRef<Path>,
-{
+pub fn resolve_path(
+    directory: impl AsRef<OsStr>,
+    filename: impl AsRef<Path>,
+    extension: &str,
+) -> String {
     let output_path = Path::new(&directory).join(filename);
 
     let output_path = output_path.to_string_lossy();
 
-    Ok(format!("{}.{}", output_path, extension))
+    format!("{output_path}.{extension}")
 }

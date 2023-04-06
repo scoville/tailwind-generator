@@ -6,5 +6,9 @@
 /target
 *.css
 *.tar.gz
+*.node
 /npm-debug.log*
 /yarn-error.log
+/fake-resources
+index.d.ts
+index.js

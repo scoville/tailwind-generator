@@ -1,130 +1,53 @@
-#[macro_use]
-extern crate lazy_static;
+#![deny(clippy::all)]
+#![deny(clippy::pedantic)]
+// Limitations of napi
+#![allow(clippy::needless_pass_by_value, clippy::inline_always)]
 
-use neon::prelude::*;
+use napi::{
+    bindgen_prelude::{Error, Result},
+    CallContext, JsObject, JsUnknown,
+};
+use napi_derive::{js_function, module_exports};
 use pyaco_generate::{run as run_generate, Options as GenerateOptions};
 use pyaco_validate::{run as run_validate, Options as ValidateOptions};
-use tokio::runtime::Runtime;
 
-lazy_static! {
-    static ref TOKIO_RUNTIME: Runtime = tokio::runtime::Builder::new_multi_thread()
-        .enable_all()
-        .build()
-        .unwrap();
+#[js_function(1)]
+fn generate(ctx: CallContext<'_>) -> Result<JsObject> {
+    let options: GenerateOptions = ctx.env.from_js_value(ctx.get::<JsUnknown>(0).unwrap())?;
+
+    ctx.env.execute_tokio_future(
+        async move {
+            match run_generate(options).await {
+                Ok(_) => Ok(()),
+                Err(_) => Err(Error::from_reason("couldn't generate code")),
+            }
+        },
+        |&mut env, _| env.get_undefined(),
+    )
 }
 
-macro_rules! get_attribute {
-    ($cx:ident[$index:literal][$name:literal] as $type:ty) => {
-        $cx.argument::<JsObject>($index)?
-            .get(&mut $cx, $name)?
-            .downcast_or_throw::<$type, _>(&mut $cx)?
-            .value(&mut $cx);
-    };
+#[js_function(1)]
+fn validate(ctx: CallContext<'_>) -> Result<JsObject> {
+    let options: ValidateOptions = ctx.env.from_js_value(ctx.get::<JsUnknown>(0).unwrap())?;
 
-    ($cx:ident[$index:literal][$name:literal]) => {
-        get_attribute!($cx[$index][$name] as JsString);
-    };
+    ctx.env.execute_tokio_future(
+        async move {
+            if run_validate(options).await.is_err() {
+                return Err(Error::from_reason("couldn't validate code"));
+            };
 
-    ($cx:ident[$name:literal]) => {
-        get_attribute!($cx[0][$name] as JsString);
-    };
-
-    ($cx:ident[$name:literal] as $type:ty) => {
-        get_attribute!($cx[0][$name] as $type);
-    };
+            Ok(())
+        },
+        |&mut env, _| env.get_undefined(),
+    )
 }
 
-fn generate(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let input = get_attribute!(cx["input"]);
+#[module_exports]
+fn init(mut exports: JsObject) -> Result<()> {
+    tracing_subscriber::fmt::init();
 
-    let lang = get_attribute!(cx["lang"]);
-
-    let lang = match lang.parse() {
-        Err(_) => return cx.throw_error("Invalid lang"),
-        Ok(lang) => lang,
-    };
-
-    let output_directory = get_attribute!(cx["outputDirectory"]);
-
-    let output_filename = get_attribute!(cx["outputFilename"]);
-
-    let watch = get_attribute!(cx["watch"] as JsBoolean);
-
-    // Unsafe conversion, invalid values will automatically be converted to `0`.
-    let watch_debounce_duration = get_attribute!(cx["watchDebounceDuration"] as JsNumber) as u64;
-
-    let options = GenerateOptions {
-        input,
-        lang,
-        output_directory,
-        output_filename,
-        watch,
-        watch_debounce_duration,
-    };
-
-    match run_generate(options) {
-        Ok(_) => Ok(cx.undefined()),
-        Err(_) => cx.throw_error("Couldn't generate code"),
-    }
-}
-
-fn validate(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let cb = cx.argument::<JsFunction>(1)?;
-
-    let capture_regex = get_attribute!(cx["captureRegex"]);
-
-    let css_input = get_attribute!(cx["cssInput"]);
-
-    let input_glob = get_attribute!(cx["inputGlob"]);
-
-    // The following will not panic, but the result is not reliable and might
-    // change depending on the platform (32/64 bits).
-    // Since we don't expect big numbers to be provided it should work fine though.
-    let max_opened_files = get_attribute!(cx["maxOpenedFiles"] as JsNumber) as usize;
-
-    let split_regex = get_attribute!(cx["splitRegex"]);
-
-    let watch = get_attribute!(cx["watch"] as JsBoolean);
-
-    // Unsafe conversion, invalid values will automatically be converted to `0`.
-    let watch_debounce_duration = get_attribute!(cx["watchDebounceDuration"] as JsNumber) as u64;
-
-    let options = ValidateOptions {
-        capture_regex,
-        css_input,
-        input_glob,
-        max_opened_files,
-        split_regex,
-        watch,
-        watch_debounce_duration,
-    };
-
-    let ret = cx.undefined();
-
-    TOKIO_RUNTIME.block_on(async move {
-        if run_validate(options).await.is_err() {
-            return cx.throw_error("Couldn't validate code");
-        };
-
-        let this = cx.undefined();
-
-        let args: Vec<Handle<JsUndefined>> = Vec::new();
-
-        cb.call(&mut cx, this, args)?;
-
-        Ok(())
-    })?;
-
-    Ok(ret)
-}
-
-#[neon::main]
-fn main(mut cx: ModuleContext) -> NeonResult<()> {
-    env_logger::init();
-
-    cx.export_function("generate", generate)?;
-
-    cx.export_function("validate", validate)?;
+    exports.create_named_method("generate", generate)?;
+    exports.create_named_method("validate", validate)?;
 
     Ok(())
 }

@@ -4,7 +4,7 @@
 const yargs = require("yargs/yargs");
 const { hideBin } = require("yargs/helpers");
 
-const pyaco = require("./index.node");
+const { generate, validate } = require("../index");
 
 yargs(hideBin(process.argv))
   .command(
@@ -23,7 +23,7 @@ yargs(hideBin(process.argv))
         .positional("lang", {
           alias: "l",
           describe:
-            "Language used in generated code (elm|purescript|rescript|typescript|typescript-type-1|typescript-type-2)",
+            "Language used in generated code (elm|purescript|rescript|typescript|typescript-type1|typescript-type2)",
         })
         .option("watch", {
           alias: "w",
@@ -33,12 +33,11 @@ yargs(hideBin(process.argv))
           default: false,
         })
         .option("watch-debounce-duration", {
-          alias: "w",
           type: "number",
           describe:
             "Watch debounce duration (in ms), if files are validated twice after saving the css file, you should try to increase this value",
           default: 10,
-        });
+        })
         .option("output-directory", {
           alias: "o",
           describe: "Directory for generated code",
@@ -46,13 +45,13 @@ yargs(hideBin(process.argv))
         });
     },
     (argv) =>
-      pyaco.generate({
+      generate({
         input: argv.input,
         lang: argv.lang,
-        outputDirectory: argv["output-directory"],
+        output_directory: argv["output-directory"],
         watch: argv.watch,
-        watchDebounceDuration: argv["watch-debounce-duration"],
-        outputFilename: argv["output-filename"],
+        watch_debounce_duration: argv["watch-debounce-duration"],
+        output_filename: argv["output-filename"],
       })
   )
   .command(
@@ -92,24 +91,21 @@ yargs(hideBin(process.argv))
           default: false,
         })
         .option("watch-debounce-duration", {
-          alias: "w",
           type: "number",
           describe:
             "Watch debounce duration (in ms), if files are validated twice after saving a file, you should try to increase this value",
           default: 10,
         });
     },
-    (argv) =>
-      pyaco.validate(
-        {
-          cssInput: argv["css-input"],
-          inputGlob: argv["input-glob"],
-          captureRegex: argv["capture-regex"],
-          maxOpenedFiles: argv["max-opened-files"],
-          splitRegex: argv["split-regex"],
-          watch: argv["watch"],
-          watchDebounceDuration: argv["watch-debounce-duration"],
-        },
-        () => {}
-      )
+    (argv) => {
+      validate({
+        css_input: argv["css-input"],
+        input_glob: argv["input-glob"],
+        capture_regex: argv["capture-regex"],
+        max_opened_files: argv["max-opened-files"],
+        split_regex: argv["split-regex"],
+        watch: argv["watch"],
+        watch_debounce_duration: argv["watch-debounce-duration"],
+      });
+    }
   ).argv;

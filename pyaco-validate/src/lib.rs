@@ -1,22 +1,35 @@
-use anyhow::Result;
+#![deny(clippy::all)]
+#![deny(clippy::pedantic)]
+
+use std::{collections::HashSet, convert::TryInto, path::Path, sync::Arc, time::Duration};
+
 use clap::Parser as ClapParser;
+use compact_str::CompactString;
 use futures::{stream, StreamExt};
 use glob::glob;
 use grep_matcher::{Captures, Matcher};
 use grep_regex::RegexMatcher;
 use grep_searcher::{sinks::UTF8, SearcherBuilder};
-use log::{error, info};
-use notify::{watcher, DebouncedEvent, RecursiveMode, Watcher};
+use notify::{ReadDirectoryChangesWatcher, RecursiveMode};
+use notify_debouncer_mini::{new_debouncer, DebouncedEvent, Debouncer};
 use pyaco_core::InputType;
 use regex::Regex;
-use std::convert::TryInto;
-use std::error::Error;
-use std::sync::mpsc::channel;
-use std::time::Duration;
-use std::{borrow::Borrow, collections::HashSet, fs::File, path::Path, process::exit, sync::Arc};
-use tokio::sync::Mutex;
+use serde::Deserialize;
+use tokio::{
+    fs::File,
+    runtime::Handle,
+    sync::{
+        mpsc::{self, Receiver},
+        Mutex,
+    },
+};
+use tracing::{error, info};
 
-#[derive(ClapParser, Debug)]
+pub use crate::errors::*;
+
+mod errors;
+
+#[derive(ClapParser, Debug, Deserialize)]
 pub struct Options {
     /// CSS file path or URL used for code verification
     #[clap(short, long)]
@@ -47,6 +60,7 @@ pub struct Options {
     pub watch_debounce_duration: u64,
 }
 
+#[allow(clippy::missing_errors_doc)]
 pub async fn run(options: Options) -> Result<()> {
     let capture_regex = Arc::new(RegexMatcher::new(options.capture_regex.as_str())?);
 
@@ -61,42 +75,42 @@ pub async fn run(options: Options) -> Result<()> {
 
     let glob_pattern = glob::Pattern::new(options.input_glob.as_str())?;
 
-    let paths = glob(glob_pattern.as_str())?;
-
     run_once(
-        paths,
+        glob(glob_pattern.as_str())?.filter_map(std::result::Result::ok),
         &css_input,
-        capture_regex.clone(),
-        split_regex.clone(),
+        Arc::clone(&capture_regex),
+        Arc::clone(&split_regex),
         options.max_opened_files,
     )
     .await?;
 
     if options.watch {
-        let (tx, rx) = channel();
-
-        let mut watcher = watcher(tx, Duration::from_millis(options.watch_debounce_duration))?;
-
+        let (mut debouncer, mut rx) =
+            async_debounced_watcher(Duration::from_millis(options.watch_debounce_duration))?;
         if let InputType::Path(ref css_input_path) = css_input {
-            watcher.watch(css_input_path, RecursiveMode::NonRecursive)?;
+            debouncer
+                .watcher()
+                .watch(css_input_path, RecursiveMode::NonRecursive)?;
         }
-
         for filepath in (glob(glob_pattern.as_str())?).flatten() {
-            watcher.watch(filepath.as_path(), RecursiveMode::NonRecursive)?;
+            debouncer
+                .watcher()
+                .watch(filepath.as_path(), RecursiveMode::NonRecursive)?;
         }
 
-        loop {
-            if let Ok(DebouncedEvent::Write(_)) = rx.recv() {
-                let paths = glob(glob_pattern.as_str())?;
-
-                run_once(
-                    paths,
-                    &css_input,
-                    capture_regex.clone(),
-                    split_regex.clone(),
-                    options.max_opened_files,
-                )
-                .await?;
+        while let Some(event) = rx.recv().await {
+            match event {
+                Ok(events) if !events.is_empty() => {
+                    run_once(
+                        glob(glob_pattern.as_str())?.filter_map(std::result::Result::ok),
+                        &css_input,
+                        Arc::clone(&capture_regex),
+                        Arc::clone(&split_regex),
+                        options.max_opened_files,
+                    )
+                    .await?;
+                }
+                _ => {}
             }
         }
     }
@@ -104,58 +118,57 @@ pub async fn run(options: Options) -> Result<()> {
     Ok(())
 }
 
-async fn run_once<I, P, E>(
-    paths: I,
+async fn run_once(
+    paths: impl IntoIterator<Item = impl AsRef<Path> + Send + 'static>,
     css_input: &InputType,
     capture_regex: Arc<RegexMatcher>,
     split_regex: Arc<Regex>,
     max_opened_files: usize,
-) -> Result<()>
-where
-    P: AsRef<Path>,
-    E: Error,
-    I: IntoIterator<Item = Result<P, E>>,
-{
+) -> Result<()> {
     // The classes contained in the provided css file/URL
-    let accepted_classes = css_input.extract_classes()?;
+    let accepted_classes = css_input.extract_classes().await?;
+    let found_classes = Arc::new(Mutex::new(HashSet::new()));
 
     // Open and extract classes from files concurrently
-    let jobs = stream::iter(paths)
-        .filter_map(|path| async move {
-            match path {
-                Ok(path) => open_file(path).await,
-                Err(_) => None,
-            }
+    stream::iter(paths)
+        .map(|path| {
+            let capture_regex = Arc::clone(&capture_regex);
+            let split_regex = Arc::clone(&split_regex);
+            let found_classes = Arc::clone(&found_classes);
+
+            tokio::spawn(async move {
+                let path = path.as_ref();
+                let file = open_file(path).await?;
+
+                if let Ok(classes) = extra_classes_from_path(
+                    file,
+                    Arc::as_ref(&capture_regex),
+                    Arc::as_ref(&split_regex),
+                ) {
+                    found_classes.lock().await.extend(classes);
+                }
+
+                Ok::<_, Error>(())
+            })
         })
-        .map(|file| {
-            tokio::spawn(extra_classes_from_path(
-                file,
-                capture_regex.clone(),
-                split_regex.clone(),
-            ))
+        .buffer_unordered(max_opened_files)
+        .map(|res| match res {
+            Ok(Ok(_)) => {}
+            Ok(Err(err)) => error!("task error: {err}"),
+            Err(err) => error!("join error: {err}"),
         })
-        .buffer_unordered(max_opened_files);
+        .collect::<()>()
+        .await;
 
-    let found_classes = Mutex::new(HashSet::new());
-
-    // Insert the classes captured into the `found_classes` set
-    jobs.for_each(|job| async {
-        let mut found_classes = found_classes.lock().await;
-
-        if let Ok(Ok(classes)) = job {
-            for class in classes {
-                found_classes.insert(class);
-            }
-        }
-    })
-    .await;
-
-    let found_classes = found_classes.lock().await;
+    let Ok(found_classes) = Arc::try_unwrap(found_classes).map(Mutex::into_inner) else {
+        error!("more than one refence to the found_classes exists, unreachable");
+        return Ok(());
+    };
 
     // Diff between whitelisted classes found the provided css and the classes found in the files
     let unknown_classes = found_classes
         .difference(&accepted_classes)
-        .collect::<HashSet<&String>>();
+        .collect::<HashSet<&CompactString>>();
 
     info!(
         "{} classes used in total in the provided files, {} whitelisted classes",
@@ -167,29 +180,28 @@ where
         println!("Used classes are all valid");
     } else {
         for unknown_class in unknown_classes {
-            println!("Unknown class found {}", unknown_class);
+            println!("Unknown class found {unknown_class}");
         }
     }
 
     Ok(())
 }
 
-pub async fn extra_classes_from_path<C, S>(
+#[allow(clippy::missing_errors_doc)]
+pub fn extra_classes_from_path(
     file: File,
-    capture_regex: C,
-    split_regex: S,
-) -> Result<HashSet<String>>
-where
-    C: Borrow<RegexMatcher>,
-    S: Borrow<Regex>,
-{
+    capture_regex: &RegexMatcher,
+    split_regex: &Regex,
+) -> Result<HashSet<CompactString>> {
     // Classes found in the visited file
     let mut found_classes = HashSet::new();
 
     // TODO: We may be able to reuse the same searcher for all the files?
     let mut searcher = SearcherBuilder::new().multi_line(true).build();
-
-    let capture_regex = capture_regex.borrow();
+    let Ok(file) = file.try_into_std() else {
+        error!("file couldn't be converted to std file");
+        return Ok(HashSet::new());
+    };
 
     searcher.search_file(
         capture_regex,
@@ -203,9 +215,9 @@ where
                     let classes = &line[m];
 
                     // ... and then split the captured classes
-                    for class in split_regex.borrow().split(classes) {
+                    for class in split_regex.split(classes) {
                         if !class.is_empty() {
-                            found_classes.insert(class.to_string());
+                            found_classes.insert(class.into());
                         }
                     }
                 }
@@ -218,19 +230,36 @@ where
     Ok(found_classes)
 }
 
-pub async fn open_file<P: AsRef<Path>>(path: P) -> Option<File> {
-    match File::open(path.as_ref()) {
-        Ok(file) => Some(file),
-        Err(error) => {
-            if let Some(24) = error.raw_os_error() {
-                eprintln!("Too many files opened [os error 24], please use the --max-opened-files options to lower the amount of opened files");
-
-                exit(2);
-            }
-
-            error!("An error occured when trying to open {:?}", path.as_ref());
-
-            None
+/// ## Errors
+///
+/// Fails if the file can't be accessed
+pub async fn open_file(path: impl AsRef<Path>) -> Result<File> {
+    File::open(path).await.map_err(|err| {
+        if let Some(24) = err.raw_os_error() {
+            error!(
+                "Too many files opened [os error 24], please use the
+                --max-opened-files options to lower the amount of opened files"
+            );
         }
-    }
+
+        err.into()
+    })
+}
+
+#[allow(clippy::type_complexity)]
+fn async_debounced_watcher(
+    timeout: Duration,
+) -> Result<(
+    Debouncer<ReadDirectoryChangesWatcher>,
+    Receiver<std::result::Result<Vec<DebouncedEvent>, Vec<notify::Error>>>,
+)> {
+    let (tx, rx) = mpsc::channel(1);
+
+    let debouncer = new_debouncer(timeout, None, move |res| {
+        Handle::current().block_on(async {
+            tx.send(res).await.unwrap();
+        });
+    })?;
+
+    Ok((debouncer, rx))
 }

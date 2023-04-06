@@ -12,9 +12,7 @@
     "pyaco": "./npm/run.js"
   },
   "scripts": {
-    "preinstall": "node ./npm/uninstall.js",
-    "postinstall": "node ./npm/install.js",
-    "release-pyaco-node": "cargo-cp-artifact -ac pyaco-node ./releases/pyaco-index.node -- cargo build --package pyaco-node --message-format=json-render-diagnostics --release"
+    "build": "napi build --release --platform --cargo-name pyaco_node -p pyaco-node --js index.js --dts index.d.ts"
   },
   "dependencies": {
     "@cloudflare/binary-install": "^0.2.0",
@@ -22,7 +20,14 @@
     "yargs": "^17.2.1"
   },
   "devDependencies": {
+    "@napi-rs/cli": "^2.15.2",
     "cargo-cp-artifact": "^0.1.5",
     "yarn": "^1.22.15"
+  },
+  "napi": {
+    "name": "pyaco",
+    "triples": {
+      "defaults": true
+    }
   }
 }

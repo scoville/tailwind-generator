@@ -1,10 +1,13 @@
+#![deny(clippy::all)]
+#![deny(clippy::pedantic)]
+
 use anyhow::Result;
-use clap::{crate_version, Parser as ClapParser};
+use clap::Parser as ClapParser;
 use pyaco_generate::{run as generate, Options as GenerateOptions};
 use pyaco_validate::{run as validate, Options as ValidateOptions};
 
 #[derive(ClapParser, Debug)]
-#[clap(name = "pyaco", version = crate_version!())]
+#[clap(name = "pyaco", version)]
 pub struct Options {
     #[clap(subcommand)]
     pub command: Command,
@@ -20,14 +23,14 @@ pub enum Command {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     let options: Options = Options::parse();
 
     match options.command {
-        Command::Generate(options) => generate(options),
-        Command::Validate(options) => validate(options).await,
-    }?;
+        Command::Generate(options) => generate(options).await?,
+        Command::Validate(options) => validate(options).await?,
+    };
 
     Ok(())
 }
