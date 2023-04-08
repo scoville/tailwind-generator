@@ -11,11 +11,7 @@ use pyaco_core::{
     Rescripti, Typescript, TypescriptType1, TypescriptType2,
 };
 use serde::Deserialize;
-use tokio::{
-    fs::create_dir_all,
-    runtime::Handle,
-    sync::mpsc::{self, Receiver},
-};
+use tokio::{fs::create_dir_all, runtime::Handle, sync::mpsc};
 use tracing::{enabled, info, warn, Level};
 
 pub use crate::errors::*;
@@ -200,7 +196,7 @@ fn async_debounced_watcher(
     timeout: Duration,
 ) -> Result<(
     Debouncer<ReadDirectoryChangesWatcher>,
-    Receiver<std::result::Result<Vec<DebouncedEvent>, Vec<notify::Error>>>,
+    mpsc::Receiver<std::result::Result<Vec<DebouncedEvent>, Vec<notify::Error>>>,
 )> {
     let (tx, rx) = mpsc::channel(1);
 

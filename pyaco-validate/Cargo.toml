@@ -6,8 +6,10 @@ rust-version.workspace = true
 authors.workspace = true
 
 [dependencies]
+async-trait.workspace = true
 clap.workspace = true
 compact_str.workspace = true
+dunce.workspace = true
 futures.workspace = true
 glob.workspace = true
 grep-matcher.workspace = true

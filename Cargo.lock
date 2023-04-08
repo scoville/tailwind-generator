@@ -1152,8 +1152,10 @@ dependencies = [
 name = "pyaco-validate"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "clap",
  "compact_str",
+ "dunce",
  "futures",
  "glob",
  "grep-matcher",

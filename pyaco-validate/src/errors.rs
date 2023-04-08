@@ -1,5 +1,8 @@
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    #[error("invalid classes found")]
+    InvalidClasses,
+
     #[error("pyaco error: {0}")]
     Pyaco(#[from] pyaco_core::Error),
 
@@ -17,6 +20,9 @@ pub enum Error {
 
     #[error("grep regex error: {0}")]
     GrepRegex(#[from] grep_regex::Error),
+
+    #[error("join error: {0}")]
+    Join(#[from] tokio::task::JoinError),
 }
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
