@@ -18,11 +18,11 @@ macro_rules! get {
         $options
             .get(&mut $cx, $name)?
             .downcast_or_throw::<$type, _>(&mut $cx)?
-            .value(&mut $cx);
+            .value(&mut $cx)
     };
 
     ($cx:ident, $options:ident, $name:expr) => {
-        get!($cx, $options, $name, JsString);
+        get!($cx, $options, $name, JsString)
     };
 }
 
