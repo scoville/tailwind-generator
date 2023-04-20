@@ -85,7 +85,8 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
             | "keyframes"
             | "-webkit-keyframes"
             | "counter-style"
-            | "font-feature-values" => AtRuleType::WithBlock(false),
+            | "font-feature-values"
+            | "-moz-document" => AtRuleType::WithBlock(false),
             _ => AtRuleType::WithoutBlock(()),
         };
 
