@@ -3,13 +3,12 @@
 .PHONY: setup release clean clean-all
 
 setup:
+	# Start setup
 	@if ! command -v cross &> /dev/null; then \
 			cargo install cross; \
 	fi
-	@if ! command -v yarn &> /dev/null; then \
-			npm install -g yarn; \
-	fi
-	@echo "Setup complete."
+	yarn
+	# Setup complete
 
 release: setup
 	# Make release directory
