@@ -5,7 +5,7 @@
 setup:
 	# Start setup
 	@if ! command -v cross &> /dev/null; then \
-			cargo install cross; \
+			cargo install cross --git https://github.com/cross-rs/cross; \
 	fi
 	yarn
 	# Setup complete
