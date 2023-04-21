@@ -12,7 +12,7 @@ function getPlatform() {
   if (type === "Windows_NT" && arch === "x64") return "win64";
   if (type === "Linux" && arch === "x64") return "linux";
   if (type === "Darwin" && arch === "x64") return "macos";
-  // if (type === "Darwin" && arch === "arm64") return "macos-arm64";
+  if (type === "Darwin" && arch === "arm64") return "macos-arm64";
 
   console.warn(
     `Unknown platform: ${type} ${arch}.
