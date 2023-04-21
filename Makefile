@@ -1,8 +1,15 @@
+# tells make that a target is not an actual file
+# always considered out-of-date and executed every time the target is explicitly requested
 .PHONY: setup release clean clean-all
 
 setup:
-	cargo install cross
-	npm install -g yarn
+	@if ! command -v cross &> /dev/null; then \
+			cargo install cross; \
+	fi
+	@if ! command -v yarn &> /dev/null; then \
+			npm install -g yarn; \
+	fi
+	@echo "Setup complete."
 
 release: setup
 	# Make release directory
