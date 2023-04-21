@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::Clap;
 use log::{debug, info, log_enabled, warn, Level};
 use notify::event::{DataChange, ModifyKind};
-use notify::{Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
+use notify::{Event, EventKind, RecursiveMode, Watcher};
 use pyaco_core::{
     resolve_path, ElmTemplate, InputType, Lang, LangTemplate, PurescriptTemplate, RescriptTemplate,
     RescriptTypeTemplate, RescriptiTemplate, TypescriptTemplate, TypescriptType1Template,
@@ -141,7 +141,7 @@ fn run_watch(
 ) -> Result<()> {
     let (tx, rx) = channel();
 
-    let mut watcher = RecommendedWatcher::new(move |result| {
+    let mut watcher = notify::recommended_watcher(move |result| {
         if tx.send(result).is_err() {
             debug!("Couldn't send event message to watcher")
         }
