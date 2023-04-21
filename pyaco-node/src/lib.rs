@@ -79,18 +79,28 @@ fn validate(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 
     let cb = cx.argument::<JsFunction>(1)?;
 
-    let capture_regex = get!(cx, options, "captureRegex");
+    let capture_regex = options
+        .get::<JsString, FunctionContext, _>(&mut cx, "captureRegex")?
+        .value(&mut cx);
 
-    let css_input = get!(cx, options, "cssInput");
+    let css_input = options
+        .get::<JsString, FunctionContext, _>(&mut cx, "cssInput")?
+        .value(&mut cx);
 
-    let input_glob = get!(cx, options, "inputGlob");
+    let input_glob = options
+        .get::<JsString, FunctionContext, _>(&mut cx, "inputGlob")?
+        .value(&mut cx);
 
     // The following will not panic, but the result is not reliable and might
     // change depending on the platform (32/64 bits).
     // Since we don't expect big numbers to be provided it should work fine though.
-    let max_opened_files = get!(cx, options, "maxOpenedFiles", JsNumber) as usize;
+    let max_opened_files = options
+        .get::<JsNumber, FunctionContext, _>(&mut cx, "maxOpenedFiles")?
+        .value(&mut cx) as usize;
 
-    let split_regex = get!(cx, options, "splitRegex");
+    let split_regex = options
+        .get::<JsString, FunctionContext, _>(&mut cx, "splitRegex")?
+        .value(&mut cx);
 
     let options = ValidateOptions {
         capture_regex,
