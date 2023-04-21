@@ -46,9 +46,16 @@ RUST_LOG=info cargo run validate -c .styles.css -i './src/**/*.tsx' --capture-re
 
 ### Building the rust binary:
 
-- Run `cargo build --release`
+- Run `cargo build --release` for compiling the binaries on your architecture
 
-- In order to build the node.js package you need to have an understanding of how a [makefile](https://www.digitalocean.com/community/tutorials/how-to-use-makefiles-to-automate-repetitive-tasks-on-an-ubuntu-vps) works. Please note there is a Makefile in the main path of this repository. The command to run is `make release`; this will compile the node.js bindings with [Neon](https://neon-bindings.com/docs/hello-world).
+- Build for a specific architecture, e.g. for Mac x86 if you are on an arm64 Mac
+
+```sh
+rustup target add x86_64-apple-darwin
+cargo build --release --target x86_64-apple-darwin
+```
+
+- In order to build the binaries cross-platform you need to have an understanding of how a [makefile](https://www.digitalocean.com/community/tutorials/how-to-use-makefiles-to-automate-repetitive-tasks-on-an-ubuntu-vps) works. Please note there is a Makefile in the main path of this repository. The command to run is `make release`; this will compile the node.js bindings with [Neon](https://neon-bindings.com/docs/hello-world) and build the app cross platform using cargo for Mac and [cross](https://github.com/cross-rs/cross) for Windows and Linux.
 
 ### Commands:
 
