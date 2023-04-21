@@ -14,19 +14,6 @@ lazy_static! {
         .unwrap();
 }
 
-// macro_rules! get {
-//     ($cx:ident, $options:ident, $name:expr, $type:ty) => {
-//         $options
-//             .get(&mut $cx, $name)?
-//             .downcast_or_throw::<$type, _>(&mut $cx)?
-//             .value(&mut $cx)
-//     };
-
-//     ($cx:ident, $options:ident, $name:expr) => {
-//         get!($cx, $options, $name, JsString)
-//     };
-// }
-
 fn generate(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let options = cx.argument::<JsObject>(0)?;
 
@@ -119,7 +106,7 @@ fn validate(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 
         let this = cx.undefined();
 
-        let args: Vec<Handle<JsUndefined>> = Vec::new();
+        let args: Vec<Handle<JsValue>> = Vec::new();
 
         cb.call(&mut cx, this, args)?;
 
