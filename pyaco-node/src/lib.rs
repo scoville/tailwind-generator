@@ -2,6 +2,7 @@
 extern crate lazy_static;
 
 use neon::prelude::*;
+use pyaco_core::Lang;
 use pyaco_generate::{run as run_generate, Options as GenerateOptions};
 use pyaco_validate::{run as run_validate, Options as ValidateOptions};
 use tokio::runtime::Runtime;
@@ -13,36 +14,51 @@ lazy_static! {
         .unwrap();
 }
 
-macro_rules! get {
-    ($cx:ident, $options:ident, $name:expr, $type:ty) => {
-        $options
-            .get(&mut $cx, $name)?
-            .downcast_or_throw::<$type, _>(&mut $cx)?
-            .value(&mut $cx)
-    };
+// macro_rules! get {
+//     ($cx:ident, $options:ident, $name:expr, $type:ty) => {
+//         $options
+//             .get(&mut $cx, $name)?
+//             .downcast_or_throw::<$type, _>(&mut $cx)?
+//             .value(&mut $cx)
+//     };
 
-    ($cx:ident, $options:ident, $name:expr) => {
-        get!($cx, $options, $name, JsString)
-    };
-}
+//     ($cx:ident, $options:ident, $name:expr) => {
+//         get!($cx, $options, $name, JsString)
+//     };
+// }
 
 fn generate(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     let options = cx.argument::<JsObject>(0)?;
 
-    let input = get!(cx, options, "input");
+    let input = options
+        .get::<JsString, FunctionContext, _>(&mut cx, "input")?
+        .value(&mut cx);
 
-    let lang = get!(cx, options, "lang");
+    let lang = options.get::<JsString, FunctionContext, _>(&mut cx, "lang");
 
-    let lang = match lang.parse() {
+    let lang = match lang {
         Err(_) => return cx.throw_error("Invalid lang"),
-        Ok(lang) => lang,
+        Ok(lang) => {
+            let lang = lang.value(&mut cx);
+
+            match lang.parse::<Lang>() {
+                Ok(lang) => lang,
+                Err(err) => return cx.throw_error(err),
+            }
+        }
     };
 
-    let output_directory = get!(cx, options, "outputDirectory");
+    let output_directory = options
+        .get::<JsString, FunctionContext, _>(&mut cx, "outputDirectory")?
+        .value(&mut cx);
 
-    let output_filename = get!(cx, options, "outputFilename");
+    let output_filename = options
+        .get::<JsString, FunctionContext, _>(&mut cx, "outputFilename")?
+        .value(&mut cx);
 
-    let watch = get!(cx, options, "watch", JsBoolean);
+    let watch = options
+        .get::<JsBoolean, FunctionContext, _>(&mut cx, "watch")?
+        .value(&mut cx);
 
     let options = GenerateOptions {
         input,
