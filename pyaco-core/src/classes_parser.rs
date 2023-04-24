@@ -2,8 +2,8 @@ use std::collections::HashSet;
 
 use anyhow::Result;
 use cssparser::{
-    AtRuleParser, AtRuleType, BasicParseError, BasicParseErrorKind, CowRcStr, ParseError, Parser,
-    ParserState, QualifiedRuleParser, Token,
+    AtRuleParser, BasicParseError, BasicParseErrorKind, CowRcStr, ParseError, Parser, ParserState,
+    QualifiedRuleParser, Token,
 };
 
 pub struct ClassesParser;
@@ -62,9 +62,8 @@ impl<'i> QualifiedRuleParser<'i> for ClassesParser {
 }
 
 impl<'i> AtRuleParser<'i> for ClassesParser {
-    type PreludeNoBlock = ();
     // `true` if the @rule body should be parsed, `false` otherwise
-    type PreludeBlock = bool;
+    type Prelude = bool;
     type AtRule = Option<HashSet<String>>;
     type Error = ();
 
@@ -73,33 +72,18 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
         &mut self,
         name: CowRcStr<'i>,
         input: &mut Parser<'i, 't>,
-    ) -> Result<AtRuleType<Self::PreludeNoBlock, Self::PreludeBlock>, ParseError<'i, Self::Error>>
-    {
-        let ret = match name.as_ref() {
-            // See https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule for more
-            // "media" is the only @rule we'll parse the body in the `parse_block` function.
-            "media" => AtRuleType::WithBlock(true),
-            "supports"
-            | "page"
-            | "font-face"
-            | "keyframes"
-            | "-webkit-keyframes"
-            | "counter-style"
-            | "font-feature-values" => AtRuleType::WithBlock(false),
-            _ => AtRuleType::WithoutBlock(()),
-        };
-
+    ) -> Result<Self::Prelude, ParseError<'i, Self::Error>> {
         // Consume the rest of the input
         while input.next().is_ok() {
             continue;
         }
 
-        Ok(ret)
+        Ok(name.as_ref() == "media")
     }
 
     fn parse_block<'t>(
         &mut self,
-        prelude: Self::PreludeBlock,
+        prelude: Self::Prelude,
         _start: &ParserState,
         input: &mut Parser<'i, 't>,
     ) -> Result<Self::AtRule, ParseError<'i, ()>> {
@@ -145,9 +129,9 @@ impl<'i> AtRuleParser<'i> for ClassesParser {
     // is returned at runtime by the `parse_prelude` function.
     fn rule_without_block(
         &mut self,
-        _prelude: Self::PreludeNoBlock,
+        _prelude: Self::Prelude,
         _start: &ParserState,
-    ) -> Self::AtRule {
-        None
+    ) -> Result<Self::AtRule, ()> {
+        Ok(None)
     }
 }

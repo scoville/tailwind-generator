@@ -34,6 +34,29 @@ Not all platforms are currently supported officially (MacOS M1 / AArch64 for ins
 
 Nonetheless, for the time being and in order to make this tool as easy as possible to use, when a platform is not recognized the node native "binary" plus an alternative CLI facade in Node.js will be used instead. So all platforms that support Node should work now. Notice that a small performance degradation is to be expected.
 
+Check the `/npm` folder and the `package.json` at the main path to get a better undertanding of how the package is being installed and run. Long story short, it uses [Neon](https://neon-bindings.com/docs/introduction), a toolchain which allows creating a native Node module from the rust code. Behind the scenes, the node js implementation will call the Rust code that you can find in crates such as pyaco-validate.
+
+### Running the tool in dev mode
+
+You'll find the detailed explanation on how to run the compiled binary in the [sections](https://github.com/scoville/tailwind-generator#examples) below. In order to run it in dev mode you'll have to replace `pyaco` with `cargo run`. Also, to get more [logs](https://docs.rs/env_logger/0.10.0/env_logger/#example) in dev mode you need to add `RUST_LOG=info`. So in dev mode, the `pyaco validate` command would look like this:
+
+```sh
+RUST_LOG=info cargo run validate -c .styles.css -i './src/**/*.tsx' --capture-regex 'Cn\.c\(\s*\n?"([^"]*)",?\n?\s*\)'
+```
+
+### Building the rust binary:
+
+- Run `cargo build --release` for compiling the binaries on your architecture
+
+- Build for a specific architecture, e.g. for Mac x86 if you are on an arm64 Mac
+
+```sh
+rustup target add x86_64-apple-darwin
+cargo build --release --target x86_64-apple-darwin
+```
+
+- In order to build the binaries cross-platform you need to have an understanding of how a [makefile](https://www.digitalocean.com/community/tutorials/how-to-use-makefiles-to-automate-repetitive-tasks-on-an-ubuntu-vps) works. Please note there is a Makefile in the main path of this repository. The command to run is `make release`; this will compile the node.js bindings with [Neon](https://neon-bindings.com/docs/hello-world) and build the app cross platform using cargo for Mac and [cross](https://github.com/cross-rs/cross) for Windows and Linux.
+
 ### Commands:
 
 To get help:
@@ -390,6 +413,6 @@ pyaco.validate(
   // The callback is required
   () => {
     console.log("All done");
-  }
+  },
 );
 ```

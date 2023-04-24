@@ -17,6 +17,6 @@ axios({
   method: "get",
   url: getNativeNodeUrl(),
   responseType: "stream",
-}).then((response) =>
-  response.data.pipe(createWriteStream("./npm/index.node"))
-);
+})
+  .then((response) => response.data.pipe(createWriteStream("./npm/index.node")))
+  .then(() => console.log("Installed node native module"));

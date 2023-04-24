@@ -8,5 +8,5 @@ version = "0.1.0"
 anyhow = "1.0.43"
 clap = "3.0.0-beta.4"
 log = "0.4.14"
-notify = "5.0.0-pre.12"
+notify = "5.1.0"
 pyaco-core = {path = "../pyaco-core"}
