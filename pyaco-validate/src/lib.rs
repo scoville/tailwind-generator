@@ -160,7 +160,7 @@ async fn run_once(
         })
         .buffer_unordered(max_opened_files)
         .map(|res| match res {
-            Ok(Ok(_)) => {}
+            Ok(Ok(())) => {}
             Ok(Err(err)) => error!("task error: {err}"),
             Err(err) => error!("join error: {err}"),
         })

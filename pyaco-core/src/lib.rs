@@ -8,7 +8,7 @@ use std::{
 };
 
 use compact_str::CompactString;
-use cssparser::{Parser, ParserInput, RuleListParser};
+use cssparser::{Parser, ParserInput, StyleSheetParser};
 use tokio::{fs::File, io::AsyncReadExt};
 use tracing::{debug_span, error, info};
 use url::Url;
@@ -86,7 +86,9 @@ fn extract_classes_from_text(css_text: impl AsRef<str>) -> Result<HashSet<Compac
 
     let mut parser_input = ParserInput::new(css_text.as_ref());
     let mut parser = Parser::new(&mut parser_input);
-    let rule_list_parser = RuleListParser::new_for_stylesheet(&mut parser, ClassesParser);
+    // let rule_list_parser = RuleListParser   ::new_for_stylesheet(&mut parser, ClassesParser);
+    let mut classes_parser = ClassesParser;
+    let rule_list_parser = StyleSheetParser::new(&mut parser, &mut classes_parser);
     let out_classes =
         rule_list_parser
             .into_iter()

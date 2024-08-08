@@ -18,11 +18,11 @@ fn generate(ctx: CallContext<'_>) -> Result<JsObject> {
     ctx.env.execute_tokio_future(
         async move {
             match run_generate(options).await {
-                Ok(_) => Ok(()),
+                Ok(()) => Ok(()),
                 Err(_) => Err(Error::from_reason("couldn't generate code")),
             }
         },
-        |&mut env, _| env.get_undefined(),
+        |&mut env, ()| env.get_undefined(),
     )
 }
 
@@ -38,7 +38,7 @@ fn validate(ctx: CallContext<'_>) -> Result<JsObject> {
 
             Ok(())
         },
-        |&mut env, _| env.get_undefined(),
+        |&mut env, ()| env.get_undefined(),
     )
 }
 
